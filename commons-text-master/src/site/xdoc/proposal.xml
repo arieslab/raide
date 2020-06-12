@@ -1,0 +1,89 @@
+<!--
+Licensed to the Apache Software Foundation (ASF) under one or more
+contributor license agreements.  See the NOTICE file distributed with
+this work for additional information regarding copyright ownership.
+The ASF licenses this file to You under the Apache License, Version 2.0
+(the "License"); you may not use this file except in compliance with
+the License.  You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<document>
+<properties>
+<title>Proposal for Apache Commons Text Package</title>
+</properties>
+<body>
+
+<section name="Proposal for Apache Commons Text Package">
+
+<subsection name="(0) Rationale">
+
+<p>Providing algorithms for processing texts like editing distance or
+similarity is out of scope of the standard Java libraries. The
+<em>Commons Text</em> Package provides these extra methods.</p>
+
+
+</subsection>
+<subsection name="(1) Scope of the Package">
+
+<p>This proposal is to create a package of Java utility classes implementing
+well known string algorithms and metrics.</p>
+
+
+</subsection>
+<subsection name="(1.5) Interaction With Other Packages">
+
+<p><em>Commons Text</em> relies only on standard JDK 7 (or later) APIs for
+production deployment.  It utilizes the JUnit unit testing framework and
+the hamcrest matcher library for developing and executing unit tests, but
+this is of interest only to developers of the component. Commons Text may be
+a dependency for several existing components in the open source world that
+implement higher order text processing.</p>
+
+<p>No external configuration files are utilized.</p>
+
+
+</subsection>
+<subsection name="(2) Initial Source of the Package">
+
+<p>The initial classes came from the <em>Commons Lang</em> and <em>Commons Codec</em> subprojects.</p>
+
+<p>The proposed package name for the new component is
+<code>org.apache.commons.text</code>.</p>
+
+
+</subsection>
+<subsection name="(3) Required Apache Commons Resources">
+
+<ul>
+<li>Git Repository - New repository <code>commons-text</code>.</li>
+<li>Mailing List - Discussions will take place on the general
+    <em>dev@commons.apache.org</em> mailing list. To help
+    list subscribers identify messages of interest, it is suggested that
+    the message subject of messages about this component be prefixed with
+    [text].</li>
+<li>Jira - New component "Common Text" under the "Commons Sandbox" product.</li>
+<li>Confluence FAQ - New category "commons-text" (when available).</li>
+</ul>
+
+
+</subsection>
+<subsection name="(4) Initial Committers">
+
+<p>The initial committers on the <em>Commons Text</em> component shall be as follows:
+<ul>
+<li>Benedikt Ritter (britter)</li>
+<li>Bruno P. Kinoshita (kinow)</li>
+</ul>
+</p>
+
+</subsection>
+</section>
+</body>
+</document>
