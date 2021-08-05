@@ -28,5 +28,12 @@
             <artifactId>opencsv</artifactId>
             <version>3.9</version>
         </dependency>
+        <dependency>
+            <groupId>br.ufba.jnose</groupId>
+            <artifactId>jnose-core</artifactId>
+            <version>0.7-SNAPSHOT</version>
+        </dependency>
     </dependencies>
 </project>
+
+
