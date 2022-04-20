@@ -1,4 +1,4 @@
-package org.ufba.raide.java.refactoring.actions;
+package org.ufba.raide.java.actions;
 
 import javax.swing.JOptionPane;
 
@@ -50,6 +50,9 @@ public class TestSmellsMenu implements IWorkbenchWindowActionDelegate {
 			}
 			else if(action.getId().equals("org.ufba.raide.java.actions.DuplicateAssert")) {
 				page.showView("org.ufba.raide.java.views.DuplicateAssert");
+			}
+			else if(action.getId().equals("org.ufba.raide.java.actions.ConditionalTestLogic")) {
+				page.showView("org.ufba.raide.java.views.ConditionalTestLogic");
 			}
 		} catch (PartInitException e) {
 			e.printStackTrace();

@@ -16,7 +16,7 @@
             </separator>
          </menu>
          <action
-               class="org.ufba.raide.java.refactoring.actions.TestSmellsMenu"
+               class="org.ufba.raide.java.actions.TestSmellsMenu"
                icon="icons/ladybird.png"
                id="org.ufba.raide.java.actions.DuplicateAssert"
                label="Duplicate Assert"
@@ -25,7 +25,15 @@
                tooltip="Duplicate Assert">
          </action>
          <action
-               class="org.ufba.raide.java.refactoring.actions.TestSmellsMenu"
+               class="org.ufba.raide.java.actions.TestSmellsMenu"
+               icon="icons/ladybird.png"
+               id="org.ufba.raide.java.actions.ConditionalTestLogic"
+               label="Conditional Test Logic"
+               menubarPath="BadSmellsMenu/sampleGroup"
+               tooltip="Conditional Test Logic">
+         </action>
+         <action
+               class="org.ufba.raide.java.actions.TestSmellsMenu"
                icon="icons/ladybird.png"
                id="org.ufba.raide.java.actions.AssertionRoulette"
                label="Assertion Roulette"
@@ -47,6 +55,13 @@
             icon="icons/ladybird.png"
             id="org.ufba.raide.java.views.AssertionRoulette"
             name="Assertion Roulette">
+      </view>
+      <view
+            category="org.ufba.raide"
+            class="org.ufba.raide.java.refactoring.views.ConditionalTestLogicView"
+            icon="icons/ladybird.png"
+            id="org.ufba.raide.java.views.ConditionalTestLogic"
+            name="Conditional Test Logic">
       </view>
       <view
             category="org.ufba.raide"
