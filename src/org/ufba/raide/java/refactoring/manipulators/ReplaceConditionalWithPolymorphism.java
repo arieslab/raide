@@ -475,7 +475,7 @@ public class ReplaceConditionalWithPolymorphism extends PolymorphismRefactoring 
 		List<ArrayList<Statement>> typeCheckStatements = typeCheckElimination.getTypeCheckStatements();
 		List<String> subclassNames = typeCheckElimination.getSubclassNames();
 		DefaultMutableTreeNode root = typeCheckElimination.getExistingInheritanceTree().getRootNode();
-		Enumeration<DefaultMutableTreeNode> enumeration = root.children();
+		Enumeration<DefaultMutableTreeNode> enumeration = (Enumeration) root.children();
 		while(enumeration.hasMoreElements()) {
 			DefaultMutableTreeNode child = enumeration.nextElement();
 			String childClassName = (String)child.getUserObject();

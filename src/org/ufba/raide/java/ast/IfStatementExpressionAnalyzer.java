@@ -268,7 +268,7 @@ public class IfStatementExpressionAnalyzer {
 	}
 	
 	public boolean allParentNodesAreConditionalAndOperators() {
-		Enumeration<DefaultMutableTreeNode> enumeration = root.breadthFirstEnumeration();
+		Enumeration<DefaultMutableTreeNode> enumeration = (Enumeration) root.breadthFirstEnumeration();
 		while(enumeration.hasMoreElements()) {
 			DefaultMutableTreeNode node = enumeration.nextElement();
 			if(!node.isLeaf()) {
@@ -281,7 +281,7 @@ public class IfStatementExpressionAnalyzer {
 	}
 
 	public boolean allParentNodesAreConditionalOrOperators() {
-		Enumeration<DefaultMutableTreeNode> enumeration = root.breadthFirstEnumeration();
+		Enumeration<DefaultMutableTreeNode> enumeration = (Enumeration) root.breadthFirstEnumeration();
 		while(enumeration.hasMoreElements()) {
 			DefaultMutableTreeNode node = enumeration.nextElement();
 			if(!node.isLeaf()) {
@@ -295,7 +295,7 @@ public class IfStatementExpressionAnalyzer {
 	
 	public int getNumberOfConditionalOperatorNodes() {
 		int counter = 0;
-		Enumeration<DefaultMutableTreeNode> enumeration = root.breadthFirstEnumeration();
+		Enumeration<DefaultMutableTreeNode> enumeration = (Enumeration) root.breadthFirstEnumeration();
 		while(enumeration.hasMoreElements()) {
 			DefaultMutableTreeNode node = enumeration.nextElement();
 			if(!node.isLeaf()) {

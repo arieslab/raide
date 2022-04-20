@@ -23,7 +23,7 @@ public class InheritanceTree {
     }
 
     public boolean contains(String nodeName) {
-    	Enumeration<DefaultMutableTreeNode> e = rootNode.breadthFirstEnumeration();
+    	Enumeration<DefaultMutableTreeNode> e = (Enumeration) rootNode.breadthFirstEnumeration();
         while(e.hasMoreElements()) {
             DefaultMutableTreeNode node = e.nextElement();
             if(node.getUserObject().equals(nodeName)) {
@@ -35,7 +35,7 @@ public class InheritanceTree {
 
     public DefaultMutableTreeNode getNode(String nodeName) {
         if(rootNode != null) {
-            Enumeration<DefaultMutableTreeNode> e = rootNode.breadthFirstEnumeration();
+            Enumeration<DefaultMutableTreeNode> e = (Enumeration) rootNode.breadthFirstEnumeration();
             while(e.hasMoreElements()) {
                 DefaultMutableTreeNode node = e.nextElement();
                 if(node.getUserObject().equals(nodeName)) {
@@ -70,7 +70,7 @@ public class InheritanceTree {
 
     public TreeMap<Integer, Set<String>> getLeavesByLevel() {
     	TreeMap<Integer, Set<String>> levelMap = new TreeMap<Integer, Set<String>>();
-    	Enumeration<DefaultMutableTreeNode> e = rootNode.breadthFirstEnumeration();
+    	Enumeration<DefaultMutableTreeNode> e = (Enumeration) rootNode.breadthFirstEnumeration();
     	while(e.hasMoreElements()) {
             DefaultMutableTreeNode node = e.nextElement();
             if(node.isLeaf()) {
