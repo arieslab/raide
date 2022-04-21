@@ -27,11 +27,36 @@
          <action
                class="org.ufba.raide.java.actions.TestSmellsMenu"
                icon="icons/ladybird.png"
+               id="org.ufba.raide.java.actions.DependentTest"
+               label="Dependent Test"
+               menubarPath="BadSmellsMenu/sampleGroup"
+               tooltip="Dependent Test">
+         </action>  
+          <action
+               class="org.ufba.raide.java.actions.TestSmellsMenu"
+               icon="icons/ladybird.png"
+               id="org.ufba.raide.java.actions.DefaultTest"
+               label="Default Test"
+               menubarPath="BadSmellsMenu/sampleGroup"
+               tooltip="Default Test">
+         </action>
+         <action
+               class="org.ufba.raide.java.actions.TestSmellsMenu"
+               icon="icons/ladybird.png"
+               id="org.ufba.raide.java.actions.ConstructionInstallation"
+               label="Construction Installation"
+               menubarPath="BadSmellsMenu/sampleGroup"
+               tooltip="Construction Installation">
+         </action>
+         <action
+               class="org.ufba.raide.java.actions.TestSmellsMenu"
+               icon="icons/ladybird.png"
                id="org.ufba.raide.java.actions.ConditionalTestLogic"
                label="Conditional Test Logic"
                menubarPath="BadSmellsMenu/sampleGroup"
                tooltip="Conditional Test Logic">
          </action>
+         
          <action
                class="org.ufba.raide.java.actions.TestSmellsMenu"
                icon="icons/ladybird.png"
@@ -39,7 +64,7 @@
                label="Assertion Roulette"
                menubarPath="BadSmellsMenu/sampleGroup"
                tooltip="Assertion Roulette">
-         </action>
+         </action>       
          
       </actionSet>
    </extension>
@@ -62,6 +87,27 @@
             icon="icons/ladybird.png"
             id="org.ufba.raide.java.views.ConditionalTestLogic"
             name="Conditional Test Logic">
+      </view>
+      <view
+            category="org.ufba.raide"
+            class="org.ufba.raide.java.refactoring.views.ConstructionInstallationView"
+            icon="icons/ladybird.png"
+            id="org.ufba.raide.java.views.ConstructionInstallation"
+            name="Construction Installation">
+      </view>
+      <view
+            category="org.ufba.raide"
+            class="org.ufba.raide.java.refactoring.views.DefaultTestView"
+            icon="icons/ladybird.png"
+            id="org.ufba.raide.java.views.DefaultTest"
+            name="Default Test">
+      </view>
+      <view
+            category="org.ufba.raide"
+            class="org.ufba.raide.java.refactoring.views.DependentTestView"
+            icon="icons/ladybird.png"
+            id="org.ufba.raide.java.views.DependentTest"
+            name="Dependent Test">
       </view>
       <view
             category="org.ufba.raide"

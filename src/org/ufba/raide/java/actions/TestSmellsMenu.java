@@ -48,12 +48,22 @@ public class TestSmellsMenu implements IWorkbenchWindowActionDelegate {
 			if(action.getId().equals("org.ufba.raide.java.actions.AssertionRoulette")) {
 				page.showView("org.ufba.raide.java.views.AssertionRoulette");
 			}
-			else if(action.getId().equals("org.ufba.raide.java.actions.DuplicateAssert")) {
-				page.showView("org.ufba.raide.java.views.DuplicateAssert");
-			}
 			else if(action.getId().equals("org.ufba.raide.java.actions.ConditionalTestLogic")) {
 				page.showView("org.ufba.raide.java.views.ConditionalTestLogic");
 			}
+			else if(action.getId().equals("org.ufba.raide.java.actions.ConstructionInstallation")) {
+				page.showView("org.ufba.raide.java.views.ConstructionInstallation");
+			}
+			else if(action.getId().equals("org.ufba.raide.java.actions.DefaultTest")) {
+				page.showView("org.ufba.raide.java.views.DefaultTest");
+			}
+			else if(action.getId().equals("org.ufba.raide.java.actions.DependentTest")) {
+				page.showView("org.ufba.raide.java.views.DependentTest");
+			}
+			else if(action.getId().equals("org.ufba.raide.java.actions.DuplicateAssert")) {
+				page.showView("org.ufba.raide.java.views.DuplicateAssert");
+			}
+			
 		} catch (PartInitException e) {
 			e.printStackTrace();
 		}
