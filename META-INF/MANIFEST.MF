@@ -32,7 +32,7 @@ Export-Package: org.ufba.raide.java.ast,
  org.ufba.raide.java.refactoring.manipulators,
  org.ufba.raide.java.refactoring.views,
  org.ufba.raide.java.testsmell,
- org.ufba.raide.java.testsmell.smell
+ org.ufba.raide.java.testsmell.detector.smell
 Bundle-ClassPath: lib/commons-beanutils-1.9.3.jar,
  lib/commons-collections-3.2.2.jar,
  lib/commons-lang3-3.5.jar,

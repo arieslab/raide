@@ -154,7 +154,7 @@ public class ConditionalTestLogicView extends ViewPart {
 	private IType selectedType;
 	private CandidateRefactoring[] candidateRefactoringTable;
 	private IJavaProject project;
-	final String REFACTORING_DESCRIPTION = "A1 A2 A3";
+	final String REFACTORING_DESCRIPTION = "Add Assertion Explanation";
 
 
     private List<TestSmellDescription> testSmells;
@@ -209,7 +209,7 @@ public class ConditionalTestLogicView extends ViewPart {
 			switch(index){
 				case 0:
 					if(entry instanceof AddExplanationCandidateRefactoring)
-						return "Assertion Roulette";
+						return "Conditional Test Logic";
 					else
 						return "";
 				case 1:
@@ -562,7 +562,7 @@ public class ConditionalTestLogicView extends ViewPart {
 				if(wasAlreadyOpen)
 					openPackageExplorerViewPart();
 				if (candidateRefactoringTable == null || candidateRefactoringTable.length == 0 ) {
-					JOptionPane.showMessageDialog(null, "Duplicate Asserts not found.");				
+					JOptionPane.showMessageDialog(null, "Conditional Test Logic not found.");				
 				}
 			}
 		};

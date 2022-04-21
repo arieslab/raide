@@ -1,4 +1,4 @@
-package org.ufba.raide.java.testsmell.smell;
+package org.ufba.raide.java.testsmell.detector.smell;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.MethodDeclaration;

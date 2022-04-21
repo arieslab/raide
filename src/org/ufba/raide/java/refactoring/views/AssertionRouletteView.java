@@ -562,7 +562,7 @@ public class AssertionRouletteView extends ViewPart {
 				if(wasAlreadyOpen)
 					openPackageExplorerViewPart();
 				if (candidateRefactoringTable == null || candidateRefactoringTable.length == 0 ) {
-					JOptionPane.showMessageDialog(null, "Duplicate Asserts not found.");				
+					JOptionPane.showMessageDialog(null, "Assertion Roulette not found.");				
 				}
 			}
 		};

@@ -7,7 +7,8 @@ import com.github.javaparser.ast.CompilationUnit;
 import org.apache.commons.lang3.StringUtils;
 import org.ufba.raide.java.refactoring.views.AssertionRouletteView;
 import org.ufba.raide.java.refactoring.views.DuplicateAssertView;
-import org.ufba.raide.java.testsmell.smell.*;
+import org.ufba.raide.java.refactoring.views.ConditionalTestLogicView;
+import org.ufba.raide.java.testsmell.detector.smell.*;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -53,34 +54,16 @@ public class TestSmellDetector {
 	public void initializeSmells(String tipoTestSmell){
         testSmells = new ArrayList<>();
         
-        if (tipoTestSmell.equals(DuplicateAssertView.getMessageDialogTitle())) {
-        	testSmells.add(new DuplicateAssert(getNameClass(), getFilePathClass()));        	
-        }
-        else if (tipoTestSmell.equals(AssertionRouletteView.getMessageDialogTitle())) {
+        if (tipoTestSmell.equals(AssertionRouletteView.getMessageDialogTitle())) {
         	testSmells.add(new AssertionRoulette(getNameClass(), getFilePathClass()));        	
         }
-        //testSmells.add(new AssertionRoulette(getNameClass(), getFilePathClass()));
+        else if (tipoTestSmell.equals(DuplicateAssertView.getMessageDialogTitle())) {
+        	testSmells.add(new DuplicateAssert(getNameClass(), getFilePathClass()));        	
+        }
+        else if (tipoTestSmell.equals(ConditionalTestLogicView.getMessageDialogTitle())) {
+        	testSmells.add(new ConditionalTestLogic(getNameClass(), getFilePathClass()));        	
+        }
         
-        /*testSmells.add(new ConditionalTestLogic());
-        testSmells.add(new ConstructorInitialization());
-        testSmells.add(new DefaultTest());
-        testSmells.add(new EmptyTest());
-        testSmells.add(new ExceptionCatchingThrowing());
-        testSmells.add(new GeneralFixture());
-        testSmells.add(new MysteryGuest());
-        testSmells.add(new PrintStatement());
-        testSmells.add(new RedundantAssertion());
-        testSmells.add(new SensitiveEquality());
-        testSmells.add(new VerboseTest());
-        testSmells.add(new SleepyTest());
-        testSmells.add(new EagerTest());
-        testSmells.add(new LazyTest());
-        testSmells.add(new DuplicateAssert());
-        testSmells.add(new UnknownTest());
-        testSmells.add(new IgnoredTest());
-        testSmells.add(new ResourceOptimism());
-        testSmells.add(new MagicNumberTest());
-        testSmells.add(new DependentTest());*/
     }
 
     /**
