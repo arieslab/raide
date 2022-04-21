@@ -217,9 +217,11 @@ public class ConditionalTestLogicView extends ViewPart {
 				case 2:
 					return getNumberString(entry.getSourceEntity2());
 				case 3:
+					return getNumberString(entry.getSourceEntity2());
+				case 4:
 					return entry.getSourceClass().getFilePath();
 					//return "Caminho do arquivo";
-				case 4:
+				case 5:
 					return REFACTORING_DESCRIPTION;
 				default:
 					return "";
@@ -311,9 +313,10 @@ public class ConditionalTestLogicView extends ViewPart {
 		/* Ordem de apresentação:
 		 * 1a Coluna: TestSmell
 		 * 2a Coluna: Source Method
-		 * 3a Coluna: Linha
-		 * 4a Coluna: Refactoring Type		 * 
-		 * 5a Coluna: Caminho do arquivo
+		 * 3a Coluna: Linha inicial
+		 * 4a Coluna: Linha final
+		 * 5a Coluna: Refactoring Type		 * 
+		 * 6a Coluna: Caminho do arquivo
 		 * */
 		tableViewer = new TableViewer(parent, SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER | SWT.FULL_SELECTION);
 		tableViewer.setContentProvider(new ViewContentProvider());
@@ -323,6 +326,7 @@ public class ConditionalTestLogicView extends ViewPart {
 		TableLayout layout = new TableLayout();
 		layout.addColumnData(new ColumnWeightData(15, true));
 		layout.addColumnData(new ColumnWeightData(25, true));
+		layout.addColumnData(new ColumnWeightData(8, true));
 		layout.addColumnData(new ColumnWeightData(8, true));
 		layout.addColumnData(new ColumnWeightData(15, true));
 		layout.addColumnData(new ColumnWeightData(20, true));
@@ -338,17 +342,21 @@ public class ConditionalTestLogicView extends ViewPart {
 		column1.setResizable(true);
 		column1.pack();
 		TableColumn column2 = new TableColumn(tableViewer.getTable(),SWT.LEFT);
-		column2.setText("Line");
+		column2.setText("Begin");
 		column2.setResizable(true);
 		column2.pack();
 		TableColumn column3 = new TableColumn(tableViewer.getTable(),SWT.LEFT);
-		column3.setText("File Path");
+		column3.setText("End");
 		column3.setResizable(true);
 		column3.pack();
 		TableColumn column4 = new TableColumn(tableViewer.getTable(),SWT.LEFT);
-		column4.setText("Refactoring Type");
+		column4.setText("File Path");
 		column4.setResizable(true);
 		column4.pack();
+		TableColumn column5 = new TableColumn(tableViewer.getTable(),SWT.LEFT);
+		column5.setText("Refactoring Type");
+		column5.setResizable(true);
+		column5.pack();
 		
 		
 		tableViewer.addSelectionChangedListener(new ISelectionChangedListener() {
@@ -974,8 +982,8 @@ public class ConditionalTestLogicView extends ViewPart {
 							new ClassObject());
 					
 					MyClass minhaOutraClasse = new MyClass(testSmells.get(i).getClassName(), testSmells.get(i).getClassName());
-					MyMethod meuMeuMetodo = new MyMethod(testSmells.get(i).getClassName(), testSmells.get(i).getMethodName() + testSmells.get(i).getLinePosition(), "");
-					addExp = new AddExplanationCandidateRefactoring(system, minhaClasse, minhaOutraClasse, meuMeuMetodo, testSmells.get(i).getLinePosition() );
+					MyMethod meuMeuMetodo = new MyMethod(testSmells.get(i).getClassName(), testSmells.get(i).getMethodName() + testSmells.get(i).getLinePositionBegin(), "");
+					addExp = new AddExplanationCandidateRefactoring(system, minhaClasse, minhaOutraClasse, meuMeuMetodo, testSmells.get(i).getLinePositionBegin() );
 					moveMethodCandidateList.add(addExp);
 				}
 				table = new CandidateRefactoring[moveMethodCandidateList.size()];

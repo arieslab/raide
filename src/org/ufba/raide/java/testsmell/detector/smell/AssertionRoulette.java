@@ -204,11 +204,14 @@ public class AssertionRoulette extends AbstractSmell {
 					// JOptionPane.showMessageDialog(null, "O método " +
 					// this.testMethod.getElementName() + "() apresenta smell");
 					
-					cadaTestSmell = new TestSmellDescription("Assertion Roulette", "Assertion Explanation", 
+					cadaTestSmell = new TestSmellDescription("Assertion Roulette", 
+															 "Assertion Explanation", 
 															 getFilePath(), getClassName(),
-															 this.testMethod.getElementName() + 
-															 "() \n" , n.getRange().get().begin.line + "", 
-															 n.getRange().get().begin.line, n.getRange().get().end.line);	
+															 this.testMethod.getElementName() + "() \n" , 
+															 n.getRange().get().begin.line + "", 
+															 n.getRange().get().begin.line + "", 
+															 n.getRange().get().begin.line, 
+															 n.getRange().get().end.line);	
 					listTestSmells.add(cadaTestSmell);
 					String smellLocation;
 					smellLocation = "Classe " + getClassName() + "\n" +

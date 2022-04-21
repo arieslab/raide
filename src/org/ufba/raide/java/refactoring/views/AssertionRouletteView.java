@@ -974,8 +974,8 @@ public class AssertionRouletteView extends ViewPart {
 							new ClassObject());
 					
 					MyClass minhaOutraClasse = new MyClass(testSmells.get(i).getClassName(), testSmells.get(i).getClassName());
-					MyMethod meuMeuMetodo = new MyMethod(testSmells.get(i).getClassName(), testSmells.get(i).getMethodName() + testSmells.get(i).getLinePosition(), "");
-					addExp = new AddExplanationCandidateRefactoring(system, minhaClasse, minhaOutraClasse, meuMeuMetodo, testSmells.get(i).getLinePosition() );
+					MyMethod meuMeuMetodo = new MyMethod(testSmells.get(i).getClassName(), testSmells.get(i).getMethodName() + testSmells.get(i).getLinePositionBegin(), "");
+					addExp = new AddExplanationCandidateRefactoring(system, minhaClasse, minhaOutraClasse, meuMeuMetodo, testSmells.get(i).getLinePositionBegin() );
 					moveMethodCandidateList.add(addExp);
 				}
 				table = new CandidateRefactoring[moveMethodCandidateList.size()];

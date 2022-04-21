@@ -156,9 +156,15 @@ public class DuplicateAssert extends AbstractSmell {
 	                		}
 	                	}
 	                	if (hasSmell) {
-		                	cadaTestSmell = new TestSmellDescription("Duplicate Assert", "Remove Line", 
-		                            getFilePath(), getClassName(), this.testMethod.getElementName() + 
-		                           "() \n" , lines + "", n.getRange().get().begin.line, n.getRange().get().end.line);	
+		                	cadaTestSmell = new TestSmellDescription("Duplicate Assert", 
+		                											 "Remove Line", 
+		                											 getFilePath(), 
+		                											 getClassName(), 
+		                											 this.testMethod.getElementName() + "() \n" , 
+		                											 lines + "", 
+		                											 lines + "", 
+		                											 n.getRange().get().begin.line, 
+		                											 n.getRange().get().end.line);	
 		                	listTestSmells.add(cadaTestSmell);
 	                	}     
                 	}

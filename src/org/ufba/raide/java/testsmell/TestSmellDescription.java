@@ -7,7 +7,8 @@ public class TestSmellDescription {
 	String filePath;
 	String className;
 	String methodName;
-	String linePosition;
+	String linePositionBegin;
+	String linePositionEnd;
 	int beginMethod;
 	int endMethod;
 	
@@ -24,19 +25,20 @@ public class TestSmellDescription {
 		this.endMethod = endMethod;
 	}
 	public TestSmellDescription(String testSmellType, String testSmellRefactoring, String filePath, 
-			String className, String methodName, String linePosition, int beginMethod, int endMethod) {
+			String className, String methodName, String linePosition,  String linePositionEnd, int beginMethod, int endMethod) {
 		
 		this.testSmellType = testSmellType;
 		this.testSmellRefactoring = testSmellRefactoring;
 		this.filePath = filePath;
 		this.className = className;
 		this.methodName = methodName;
-		this.linePosition = linePosition;
+		this.linePositionBegin = linePosition;
+		this.linePositionEnd = linePositionEnd;		
 		this.beginMethod = beginMethod;
 		this.endMethod = endMethod;
 	}
 	public TestSmellDescription() {
-		new TestSmellDescription("", "", "", "", "", "", 0, 0);		
+		new TestSmellDescription("", "", "", "", "", "", "", 0, 0);		
 	}	
 	
 	
@@ -70,11 +72,17 @@ public class TestSmellDescription {
 	public void setMethodName(String methodName) {
 		this.methodName = methodName;
 	}
-	public String getLinePosition() {
-		return linePosition;
+	public String getLinePositionBegin() {
+		return linePositionBegin;
 	}
-	public void setLinePosition(String linePosition) {
-		this.linePosition = linePosition;
+	public void setLinePositionBegin(String linePositionBegin) {
+		this.linePositionBegin = linePositionBegin;
+	}
+	public String getLinePositionEnd() {
+		return linePositionEnd;
+	}
+	public void setLinePositionEnd(String linePositionEnd) {
+		this.linePositionEnd = linePositionEnd;
 	}
 	
 	

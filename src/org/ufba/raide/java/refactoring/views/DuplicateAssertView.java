@@ -835,7 +835,7 @@ public class DuplicateAssertView extends ViewPart {
         
         for (TestSmellDescription smell: lista){
         	//int vetorSmellLinha[] = {109, 113};
-        	String aux = smell.getLinePosition().replace(" ", "");
+        	String aux = smell.getLinePositionBegin().replace(" ", "");
         	int vetorSmellLinha[] = stringToIntArray(aux);
         	for (int j = 0; j < vetorSmellLinha.length ; j++) {
         		teste[vetorSmellLinha[j] - diferencaLinha] = j + 1;
@@ -1029,8 +1029,8 @@ public class DuplicateAssertView extends ViewPart {
 							new ClassObject());
 					
 					MyClass minhaOutraClasse = new MyClass(testSmells.get(i).getClassName(), testSmells.get(i).getClassName());
-					MyMethod meuMeuMetodo = new MyMethod(testSmells.get(i).getClassName(), testSmells.get(i).getMethodName() + testSmells.get(i).getLinePosition(), "");
-					addExp = new MethodExtractionCandidateRefactoring(system, minhaClasse, minhaOutraClasse, meuMeuMetodo, testSmells.get(i).getLinePosition(), testSmells.get(i).getBeginMethod(), testSmells.get(i).getEndMethod()  );
+					MyMethod meuMeuMetodo = new MyMethod(testSmells.get(i).getClassName(), testSmells.get(i).getMethodName() + testSmells.get(i).getLinePositionBegin(), "");
+					addExp = new MethodExtractionCandidateRefactoring(system, minhaClasse, minhaOutraClasse, meuMeuMetodo, testSmells.get(i).getLinePositionBegin(), testSmells.get(i).getBeginMethod(), testSmells.get(i).getEndMethod()  );
 					moveMethodCandidateList.add(addExp);
 				}
 				table = new CandidateRefactoring[moveMethodCandidateList.size()];
