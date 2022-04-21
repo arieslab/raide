@@ -400,4 +400,16 @@ public class ExtractClassCandidateRefactoring extends CandidateRefactoring imple
 		return null;
 	}
 
+	@Override
+	public Position getPosition() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void setPosition(int line, int column) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

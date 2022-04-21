@@ -30,6 +30,8 @@ public abstract class CandidateRefactoring {
 	public abstract String getMethod();
 	public abstract int getBeginMethod();
 	public abstract int getEndMethod();
+	public abstract Position getPosition();
+	public abstract void setPosition(int line, int column);
 	
 	public MyClass getSourceClass() {
 		return null;

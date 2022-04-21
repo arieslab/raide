@@ -375,4 +375,16 @@ public class MoveMethodCandidateRefactoring extends CandidateRefactoring impleme
 		//return sourceMethod.toString();
 		return sourceMethod.getMethodName();
 	}
+
+	@Override
+	public Position getPosition() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void setPosition(int line, int column) {
+		// TODO Auto-generated method stub
+		
+	}
 }

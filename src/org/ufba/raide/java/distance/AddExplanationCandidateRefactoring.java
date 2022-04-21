@@ -44,22 +44,28 @@ public class AddExplanationCandidateRefactoring extends CandidateRefactoring imp
     private String movedMethodName;
     private AssertionRouletteVisualizationData visualizationData;
     private Integer userRate;
+    private String lineNumber;
+    private Position position;
+    
     public String getLineNumber() {
 		return lineNumber;
 	}
 	public void setLineNumber(String lineNumber) {
 		this.lineNumber = lineNumber;
 	}
+	
+	@Override
+	public Position getPosition() {
+		return position;
+	}
+	@Override
+	public void setPosition(int line, int column) {
+		// TODO Auto-generated method stub
+		
+	}
 
-	private String lineNumber;
-
-    public AddExplanationCandidateRefactoring(MySystem system, MyClass sourceClass, MyClass targetClass, MyMethod sourceMethod) {
-    	/*try {
-			callAssertionRoulette();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}*/
-    	
+    public AddExplanationCandidateRefactoring(MySystem system, MyClass sourceClass, MyClass targetClass, MyMethod sourceMethod, Position targetPosition) {
+  
         this.system = system;
     	this.sourceClass = sourceClass;
         this.targetClass = targetClass;
@@ -67,38 +73,7 @@ public class AddExplanationCandidateRefactoring extends CandidateRefactoring imp
         this.additionalMethodsToBeMoved = new LinkedHashMap<MethodInvocation, MethodDeclaration>();
         this.movedMethodName = sourceMethod.getMethodName();
         this.lineNumber = lineNumber;
-        //pear a lista de smells aqui
-        /*List<MethodInvocationObject> methodInvocations = sourceMethod.getMethodObject().getMethodInvocations();
-        for(MethodInvocationObject methodInvocation : methodInvocations) {
-        	if(methodInvocation.getOriginClassName().equals(sourceClass.getClassObject().getName()) &&
-        			!sourceClass.getClassObject().containsMethodInvocation(methodInvocation, sourceMethod.getMethodObject()) &&
-        			!system.getSystemObject().containsMethodInvocation(methodInvocation, sourceClass.getClassObject())) {
-        		
-        		MethodObject invokedMethod = sourceClass.getClassObject().getMethod(methodInvocation);
-        		boolean systemMemberAccessed = false;
-        		for(MethodInvocationObject methodInvocationObject : invokedMethod.getMethodInvocations()) {
-        			if(system.getSystemObject().getClassObject(methodInvocationObject.getOriginClassName()) != null) {
-        				systemMemberAccessed = true;
-        				break;
-        			}
-        		}
-        		if(!systemMemberAccessed) {
-        			for(FieldInstructionObject fieldInstructionObject : invokedMethod.getFieldInstructions()) {
-        				if(system.getSystemObject().getClassObject(fieldInstructionObject.getOwnerClass()) != null) {
-        					systemMemberAccessed = true;
-        					break;
-        				}
-        			}
-        		}
-        		if(!systemMemberAccessed && !additionalMethodsToBeMoved.containsKey(methodInvocation.getMethodInvocation()))
-        			additionalMethodsToBeMoved.put(methodInvocation.getMethodInvocation(), invokedMethod.getMethodDeclaration());
-        	}
-        }
-        ClassObject co = new ClassObject();*/
-        //this.visualizationData = new AssertionRouletteVisualizationData(new ClassObject(), new MethodObject(null), new ClassObject());
-        /*this.visualizationData = new AssertionRouletteVisualizationData(sourceClass.getClassObject(),
-				sourceMethod.getMethodObject(), targetClass.getClassObject());*/
-        
+        this.position = targetPosition;
         
         List<MethodInvocationObject> methodInvocations = sourceMethod.getMethodObject().getMethodInvocations();
         for(MethodInvocationObject methodInvocation : methodInvocations) {
@@ -128,7 +103,7 @@ public class AddExplanationCandidateRefactoring extends CandidateRefactoring imp
         this.visualizationData = new AssertionRouletteVisualizationData(sourceClass.getClassObject(),
 				sourceMethod.getMethodObject(), targetClass.getClassObject());
     }
-    public AddExplanationCandidateRefactoring(MySystem system, MyClass sourceClass, MyClass targetClass, MyMethod sourceMethod, String lineNumber) {
+    public AddExplanationCandidateRefactoring(MySystem system, MyClass sourceClass, MyClass targetClass, MyMethod sourceMethod, String lineNumber, Position targetPosition) {
     	
         this.system = system;
     	this.sourceClass = sourceClass;
@@ -138,7 +113,7 @@ public class AddExplanationCandidateRefactoring extends CandidateRefactoring imp
         this.movedMethodName = sourceMethod.getMethodName();
         this.lineNumber = lineNumber;
         this.visualizationData = new AssertionRouletteVisualizationData(new ClassObject(), new MethodObject(null), new ClassObject());
-      
+        this.position = targetPosition;
     }
     private List<MyTestSmells> callAssertionRoulette() throws IOException{
     	List<MyTestSmells> listaTestSmells = new ArrayList<MyTestSmells>();

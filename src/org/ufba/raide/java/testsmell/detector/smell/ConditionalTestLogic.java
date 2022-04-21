@@ -223,7 +223,7 @@ public class ConditionalTestLogic extends AbstractSmell {
 		String smellLocation;
 		smellLocation = "Classe " + getClassName() + "\n" + 
 						"Método " + testMethod.getElementName() + "() \n" + 
-						"Begin " + range.begin.line + "() \n" +
+						"Begin " + range.begin.line + "\n" +
 						"End " + range.end.line;
 		System.out.println(smellLocation);
 	}

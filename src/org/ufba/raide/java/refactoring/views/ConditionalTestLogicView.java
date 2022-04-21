@@ -217,7 +217,7 @@ public class ConditionalTestLogicView extends ViewPart {
 				case 2:
 					return getNumberString(entry.getSourceEntity2());
 				case 3:
-					return getNumberString(entry.getSourceEntity2());
+					return String.valueOf(entry.getPosition().offset);
 				case 4:
 					return entry.getSourceClass().getFilePath();
 					//return "Caminho do arquivo";
@@ -983,7 +983,8 @@ public class ConditionalTestLogicView extends ViewPart {
 					
 					MyClass minhaOutraClasse = new MyClass(testSmells.get(i).getClassName(), testSmells.get(i).getClassName());
 					MyMethod meuMeuMetodo = new MyMethod(testSmells.get(i).getClassName(), testSmells.get(i).getMethodName() + testSmells.get(i).getLinePositionBegin(), "");
-					addExp = new AddExplanationCandidateRefactoring(system, minhaClasse, minhaOutraClasse, meuMeuMetodo, testSmells.get(i).getLinePositionBegin() );
+					Position minhaPosicao = new Position(Integer.valueOf(testSmells.get(i).getLinePositionEnd().toString()), 0);
+					addExp = new AddExplanationCandidateRefactoring(system, minhaClasse, minhaOutraClasse, meuMeuMetodo, testSmells.get(i).getLinePositionBegin(), minhaPosicao );
 					moveMethodCandidateList.add(addExp);
 				}
 				table = new CandidateRefactoring[moveMethodCandidateList.size()];

@@ -25,14 +25,14 @@ public class TestSmellDescription {
 		this.endMethod = endMethod;
 	}
 	public TestSmellDescription(String testSmellType, String testSmellRefactoring, String filePath, 
-			String className, String methodName, String linePosition,  String linePositionEnd, int beginMethod, int endMethod) {
+			String className, String methodName, String linePositionBegin,  String linePositionEnd, int beginMethod, int endMethod) {
 		
 		this.testSmellType = testSmellType;
 		this.testSmellRefactoring = testSmellRefactoring;
 		this.filePath = filePath;
 		this.className = className;
 		this.methodName = methodName;
-		this.linePositionBegin = linePosition;
+		this.linePositionBegin = linePositionBegin;
 		this.linePositionEnd = linePositionEnd;		
 		this.beginMethod = beginMethod;
 		this.endMethod = endMethod;
