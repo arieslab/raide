@@ -63,6 +63,24 @@ public class TestSmellsMenu implements IWorkbenchWindowActionDelegate {
 			else if(action.getId().equals("org.ufba.raide.java.actions.DuplicateAssert")) {
 				page.showView("org.ufba.raide.java.views.DuplicateAssert");
 			}
+			else if(action.getId().equals("org.ufba.raide.java.actions.EagerTest")) {
+				page.showView("org.ufba.raide.java.views.EagerTest");
+			}
+			else if(action.getId().equals("org.ufba.raide.java.actions.EmptyTest")) {
+				page.showView("org.ufba.raide.java.views.EmptyTest");
+			}
+			else if(action.getId().equals("org.ufba.raide.java.actions.ExceptionCatchingThrowing")) {
+				page.showView("org.ufba.raide.java.views.ExceptionCatchingThrowing");
+			}
+			else if(action.getId().equals("org.ufba.raide.java.actions.GeneralFixture")) {
+				page.showView("org.ufba.raide.java.views.GeneralFixture");
+			}
+			else if(action.getId().equals("org.ufba.raide.java.actions.IgnoredTest")) {
+				page.showView("org.ufba.raide.java.views.IgnoredTest");
+			}
+//			else if(action.getId().equals("org.ufba.raide.java.actions.")) {
+//				page.showView("org.ufba.raide.java.views.");
+//			}
 			
 		} catch (PartInitException e) {
 			e.printStackTrace();

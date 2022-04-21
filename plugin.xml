@@ -9,21 +9,64 @@
             visible="true"
             id="org.ufba.raide.TestSmells">
          <menu
-               label="Test Smells"
-               id="BadSmellsMenu">
-            <separator
-                  name="sampleGroup">
-            </separator>
+               id="BadSmellsMenu"
+               label="RAIDE">
          </menu>
+         
+         <action
+               class="org.ufba.raide.java.actions.TestSmellsMenu"
+               icon="icons/ladybird.png"
+               id="org.ufba.raide.java.actions.IgnoredTest"
+               label="Ignored Test"
+               menubarPath="BadSmellsMenu/sampleGroup"
+               tooltip="Ignored Test">
+         </action>
+         
+         <action
+               class="org.ufba.raide.java.actions.TestSmellsMenu"
+               icon="icons/ladybird.png"
+               id="org.ufba.raide.java.actions.GeneralFixture"
+               label="General Fixture"
+               menubarPath="BadSmellsMenu/sampleGroup"
+               tooltip="General Fixture">
+         </action>
+         
+         <action
+               class="org.ufba.raide.java.actions.TestSmellsMenu"
+               icon="icons/ladybird.png"
+               id="org.ufba.raide.java.actions.ExceptionCatchingThrowing"
+               label="Exception Catching Throwing"
+               menubarPath="BadSmellsMenu/sampleGroup"
+               tooltip="Exception Catching Throwing">
+         </action>
+         
+         <action
+               class="org.ufba.raide.java.actions.TestSmellsMenu"
+               icon="icons/ladybird.png"
+               id="org.ufba.raide.java.actions.EmptyTest"
+               label="Empty Test"
+               menubarPath="BadSmellsMenu/sampleGroup"
+               tooltip="Empty Test">
+         </action>
+         
+         <action
+               class="org.ufba.raide.java.actions.TestSmellsMenu"
+               icon="icons/ladybird.png"
+               id="org.ufba.raide.java.actions.EagerTest"
+               label="Eager Test"
+               menubarPath="BadSmellsMenu/sampleGroup"
+               tooltip="Eager Test">
+         </action>
+         
          <action
                class="org.ufba.raide.java.actions.TestSmellsMenu"
                icon="icons/ladybird.png"
                id="org.ufba.raide.java.actions.DuplicateAssert"
                label="Duplicate Assert"
                menubarPath="BadSmellsMenu/sampleGroup"
-               style="push"
                tooltip="Duplicate Assert">
          </action>
+         
          <action
                class="org.ufba.raide.java.actions.TestSmellsMenu"
                icon="icons/ladybird.png"
@@ -31,7 +74,7 @@
                label="Dependent Test"
                menubarPath="BadSmellsMenu/sampleGroup"
                tooltip="Dependent Test">
-         </action>  
+         </action>
           <action
                class="org.ufba.raide.java.actions.TestSmellsMenu"
                icon="icons/ladybird.png"
@@ -56,7 +99,6 @@
                menubarPath="BadSmellsMenu/sampleGroup"
                tooltip="Conditional Test Logic">
          </action>
-         
          <action
                class="org.ufba.raide.java.actions.TestSmellsMenu"
                icon="icons/ladybird.png"
@@ -64,16 +106,11 @@
                label="Assertion Roulette"
                menubarPath="BadSmellsMenu/sampleGroup"
                tooltip="Assertion Roulette">
-         </action>       
-         
-      </actionSet>
+         </action>
+   </actionSet>
    </extension>
    <extension
          point="org.eclipse.ui.views">
-      <category
-            name="Test Smells"
-            id="org.ufba.raide">
-      </category>
       <view
             category="org.ufba.raide"
             class="org.ufba.raide.java.refactoring.views.AssertionRouletteView"
@@ -118,10 +155,38 @@
       </view>
       <view
             category="org.ufba.raide"
-            class="org.ufba.raide.java.refactoring.views.CodeSmellPackageExplorer"
-            icon="icons/repair.png"
-            id="org.ufba.raide.java.views.CodeSmellPackageExplorer"
-            name="Code Smell Package Explorer">
+            class="org.ufba.raide.java.refactoring.views.EagerTestView"
+            icon="icons/ladybird.png"
+            id="org.ufba.raide.java.views.EagerTest"
+            name="Eager Test">
+      </view>
+      <view
+            category="org.ufba.raide"
+            class="org.ufba.raide.java.refactoring.views.EmptyTestView"
+            icon="icons/ladybird.png"
+            id="org.ufba.raide.java.views.EmptyTest"
+            name="Empty Test">
+      </view>
+      <view
+            category="org.ufba.raide"
+            class="org.ufba.raide.java.refactoring.views.ExceptionCatchingThrowingView"
+            icon="icons/ladybird.png"
+            id="org.ufba.raide.java.views.ExceptionCatchingThrowing"
+            name="Exception Catching Throwing">
+      </view>
+      <view
+            category="org.ufba.raide"
+            class="org.ufba.raide.java.refactoring.views.GeneralFixtureView"
+            icon="icons/ladybird.png"
+            id="org.ufba.raide.java.views.GeneralFixture"
+            name="General Fixture">
+      </view>
+      <view
+            category="org.ufba.raide"
+            class="org.ufba.raide.java.refactoring.views.IgnoredTestView"
+            icon="icons/ladybird.png"
+            id="org.ufba.raide.java.views.IgnoredTest"
+            name="Ignored Test">
       </view>
    </extension>
    <extension
