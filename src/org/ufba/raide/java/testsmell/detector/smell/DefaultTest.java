@@ -38,7 +38,7 @@ import org.ufba.raide.java.testsmell.Util;
  */
 
 
-public class EmptyTest extends AbstractSmell {
+public class DefaultTest extends AbstractSmell {
 	
 	private ArrayList<MethodUsage> instanceEmpty;
 	
@@ -60,14 +60,14 @@ public class EmptyTest extends AbstractSmell {
 		this.filePath = filePath;
 	}	
 
-	public EmptyTest(String name, String path) {
+	public DefaultTest(String name, String path) {
 		setClassName(name);
 		setFilePath(path);
 		smellyElementList = new ArrayList<>();
 	}
 	@Override
 	public String getSmellName() {
-		return "Empty Test";
+		return "Default Test";
 	}
 
 	/**
@@ -98,8 +98,8 @@ public class EmptyTest extends AbstractSmell {
 		
 		listTestSmells = new ArrayList<TestSmellDescription>();
 		
-		EmptyTest.ClassVisitor classVisitor;
-		classVisitor = new EmptyTest.ClassVisitor();
+		DefaultTest.ClassVisitor classVisitor;
+		classVisitor = new DefaultTest.ClassVisitor();
 		classVisitor.visit(testFileCompilationUnit, null);
 		
 		return listTestSmells;
@@ -136,7 +136,7 @@ public class EmptyTest extends AbstractSmell {
 
 	}
 	public void insertTestSmell (Range range, MethodDeclaration testMethod) {
-		cadaTestSmell = new TestSmellDescription("Empty Test", 
+		cadaTestSmell = new TestSmellDescription("Default Test", 
 												 "Refactoring ...", 
 				 								 getFilePath(), 
 				 								 getClassName(),
