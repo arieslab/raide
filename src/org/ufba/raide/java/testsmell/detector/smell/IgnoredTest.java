@@ -110,14 +110,8 @@ public class IgnoredTest extends AbstractSmell {
 	}
 
 	private class ClassVisitor extends VoidVisitorAdapter<Void> {
-		private MethodDeclaration currentMethod = null;
-		TestMethod testMethod;
 		TestClass testClass;
 		
-		
-        /**
-         * The purpose of this method is to 'visit' all test methods in the test file.
-         */
         @Override
         public void visit(MethodDeclaration n, Void arg) {
 

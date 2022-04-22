@@ -2,6 +2,8 @@ package org.ufba.raide.java.testsmell.detector.smell;
 
 import com.github.javaparser.Range;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.Modifier;
+import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.ConditionalExpr;
 import com.github.javaparser.ast.expr.MethodCallExpr;
@@ -23,6 +25,7 @@ import javax.swing.JOptionPane;
 import org.ufba.raide.java.refactoring.views.*;
 import org.ufba.raide.java.testsmell.AbstractSmell;
 import org.ufba.raide.java.testsmell.SmellyElement;
+import org.ufba.raide.java.testsmell.TestClass;
 import org.ufba.raide.java.testsmell.TestMethod;
 import org.ufba.raide.java.testsmell.TestSmellDescription;
 import org.ufba.raide.java.testsmell.Util;
@@ -37,10 +40,13 @@ import org.ufba.raide.java.testsmell.Util;
 
 public class EmptyTest extends AbstractSmell {
 	
+	private ArrayList<MethodUsage> instanceEmpty;
+	
+	private boolean flag = false;
+	
 	ArrayList<TestSmellDescription> listTestSmells;
 	TestSmellDescription cadaTestSmell;	
 	private List<SmellyElement> smellyElementList;
-	private List<MethodUsage> methodConditional;
 	
 	String className;
 	String filePath;
@@ -58,11 +64,10 @@ public class EmptyTest extends AbstractSmell {
 		setClassName(name);
 		setFilePath(path);
 		smellyElementList = new ArrayList<>();
-		methodConditional = new ArrayList<>();
 	}
 	@Override
 	public String getSmellName() {
-		return "Conditional Test Logic";
+		return "Empty Test";
 	}
 
 	/**
@@ -97,6 +102,15 @@ public class EmptyTest extends AbstractSmell {
 		classVisitor = new EmptyTest.ClassVisitor();
 		classVisitor.visit(testFileCompilationUnit, null);
 		
+//		for (MethodUsage method : instanceEmpty) {
+//            TestMethod testClass = new TestMethod(method.getTestMethodName());
+//            testClass.setRange(method.getBlock());
+////            testClass.addDataItem("begin", method.getBlock());
+////            testClass.addDataItem("end", method.getBlock()); // [Remover]
+//            testClass.setHasSmell(true);
+//            smellyElementList.add(testClass);
+//        }
+		
 		return listTestSmells;
 	}
 
@@ -110,122 +124,43 @@ public class EmptyTest extends AbstractSmell {
 	}
 
 	private class ClassVisitor extends VoidVisitorAdapter<Void> {
-		private MethodDeclaration currentMethod = null;
-		private int conditionCount, ifCount, switchCount, forCount, foreachCount, whileCount, doCount = 0;
-		TestMethod testMethod;
-
+		TestClass testClass;
 		@Override
 		public void visit(MethodDeclaration n, Void arg) {
 			
 			if (Util.isValidTestMethod(n)) {
-				currentMethod = n;
-				testMethod = new TestMethod(n.getNameAsString());
-				testMethod.setHasSmell(false); 
-				super.visit(n, arg);
-				
-				testMethod.setHasSmell(true);
-
-				currentMethod = null;
-                conditionCount = 0;
-                ifCount = 0;
-                switchCount = 0;
-                forCount = 0;
-                foreachCount = 0;
-                whileCount = 0;
-                doCount = 0;
+				//method should not be abstract
+                if (!n.isAbstract()) {
+                    if (n.getBody().isPresent()) {
+                        //get the total number of statements contained in the method
+                        if (n.getBody().get().getStatements().size() == 0) {
+//                            instanceEmpty.add(new MethodUsage(n.getNameAsString(),"",n.getRange().get().begin.line + "-" + n.getRange().get().end.line));
+                        	insertTestSmell(n.getRange().get(), n);
+                            return;
+                        }
+                    }
+                }
 			}
 		}
-	
-
-		@Override
-		public void visit(IfStmt n, Void arg) {
-			super.visit(n, arg);
-			if (currentMethod != null) {
-			    ifCount++;
-			    methodConditional.add(new MethodUsage(currentMethod.getNameAsString(), "", n.getRange().get().begin.line + "-" + n.getRange().get().end.line));
-			    insertTestSmell(n.getRange().get(), this.testMethod);
-			}
-		}
-		
-		@Override
-		public void visit(SwitchStmt n, Void arg) {
-		    super.visit(n, arg);
-		    if (currentMethod != null) {
-		        switchCount++;
-		        methodConditional.add(new MethodUsage(currentMethod.getNameAsString(), "",n.getRange().get().begin.line + "-" + n.getRange().get().end.line));
-		        insertTestSmell(n.getRange().get(), this.testMethod);
-		    }
-		}
-		
-		@Override
-		public void visit(ConditionalExpr n, Void arg) {
-		    super.visit(n, arg);
-		    if (currentMethod != null) {
-		        conditionCount++;
-		        methodConditional.add(new MethodUsage(currentMethod.getNameAsString(), "",n.getRange().get().begin.line + "-" + n.getRange().get().end.line));
-		        insertTestSmell(n.getRange().get(), this.testMethod);
-		    }
-		}
-		
-		@Override
-		public void visit(ForStmt n, Void arg) {
-		    super.visit(n, arg);
-		    if (currentMethod != null) {
-		        forCount++;
-		        methodConditional.add(new MethodUsage(currentMethod.getNameAsString(), "", n.getRange().get().begin.line + "-" + n.getRange().get().end.line));
-		        insertTestSmell(n.getRange().get(), this.testMethod);
-		    }
-		}
-		
-		@Override
-		public void visit(ForeachStmt n, Void arg) {
-		    super.visit(n, arg);
-		    if (currentMethod != null) {
-		        foreachCount++;
-				methodConditional.add(new MethodUsage(currentMethod.getNameAsString(), "", n.getRange().get().begin.line + "-" + n.getRange().get().end.line));
-				insertTestSmell(n.getRange().get(), this.testMethod);
-		    }
-		}
-		
-		@Override
-		public void visit(WhileStmt n, Void arg) {
-		    super.visit(n, arg);
-		    if (currentMethod != null) {
-		        whileCount++;
-		        methodConditional.add(new MethodUsage(currentMethod.getNameAsString(), "", n.getRange().get().begin.line + "-" + n.getRange().get().end.line));
-		        insertTestSmell(n.getRange().get(), this.testMethod);
-		    }
-		}
-		
-		@Override
-		public void visit(DoStmt n, Void arg) {
-		    super.visit(n, arg);
-		    if (currentMethod != null) {
-		        doCount++;
-		        methodConditional.add(new MethodUsage(currentMethod.getNameAsString(), "", n.getRange().get().begin.line + "-" + n.getRange().get().end.line));
-		        insertTestSmell(n.getRange().get(), this.testMethod);
-		    }
-		}
-		
 
 	}
-	public void insertTestSmell (Range range, TestMethod testMethod) {
-		cadaTestSmell = new TestSmellDescription("Conditional Test Logic", 
-												 "Assertion Explanation", 
+	public void insertTestSmell (Range range, MethodDeclaration testMethod) {
+		cadaTestSmell = new TestSmellDescription("Empty Test", 
+												 "Refactoring ...", 
 				 								 getFilePath(), 
 				 								 getClassName(),
-				 								 testMethod.getElementName() + "() \n" ,
+				 								 testMethod.getName() + "() \n" ,
 				 								 range.begin.line + "", 
 				 								 range.end.line + "", 
 				 								 range.begin.line, 
 				 								 range.end.line);	
 		listTestSmells.add(cadaTestSmell);
-//		String smellLocation;
-//		smellLocation = "Classe " + getClassName() + "\n" + 
-//						"Método " + testMethod.getElementName() + "() \n" + 
-//						"Begin " + range.begin.line + "\n" +
-//						"End " + range.end.line;
-//		System.out.println(smellLocation);
+		String smellLocation;
+		smellLocation = "Classe " + getClassName() + "\n" + 
+						"Método " + testMethod.getName() + "() \n" + 
+						"Begin " + range.begin.line + "\n" +
+						"End " + range.end.line;
+		System.out.println(smellLocation);
 	}
 	
 	public String getClassName() {

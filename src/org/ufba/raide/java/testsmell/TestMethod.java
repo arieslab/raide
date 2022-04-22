@@ -9,6 +9,8 @@ public class TestMethod extends SmellyElement {
     private boolean hasSmell;
     private Map<String, String> data;
 
+    private String range;
+
     public TestMethod(String methodName) {
         this.methodName = methodName;
         data = new HashMap<>();
@@ -36,4 +38,13 @@ public class TestMethod extends SmellyElement {
     public Map<String, String> getData() {
         return data;
     }
+ 
+    public String getRange() {
+        return range;
+    }
+
+    public void setRange(String range) {
+        this.range = range;
+    }
+
 }

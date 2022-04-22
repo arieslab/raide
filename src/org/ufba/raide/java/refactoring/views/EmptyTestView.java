@@ -140,7 +140,7 @@ import org.eclipse.ltk.ui.refactoring.RefactoringWizardOpenOperation;
 
 public class EmptyTestView extends ViewPart {
 	
-	private static final String MESSAGE_DIALOG_TITLE = "Conditional Test Logic";
+	private static final String MESSAGE_DIALOG_TITLE = "Empty Test";
 	private TableViewer tableViewer;
 	private TreeViewer treeViewer;
 	private Action identifyBadSmellsAction;
@@ -154,7 +154,7 @@ public class EmptyTestView extends ViewPart {
 	private IType selectedType;
 	private CandidateRefactoring[] candidateRefactoringTable;
 	private IJavaProject project;
-	final String REFACTORING_DESCRIPTION = "Add Assertion Explanation";
+	final String REFACTORING_DESCRIPTION = "Refactoring ..";
 
 
     private List<TestSmellDescription> testSmells;
@@ -209,7 +209,7 @@ public class EmptyTestView extends ViewPart {
 			switch(index){
 				case 0:
 					if(entry instanceof AddExplanationCandidateRefactoring)
-						return "Conditional Test Logic";
+						return "Empty Test";
 					else
 						return "";
 				case 1:
