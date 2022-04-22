@@ -213,7 +213,7 @@ public class DefaultTestView extends ViewPart {
 					else
 						return "";
 				case 1:
-					return getTextString(entry.getSourceEntity2()) + "( )";
+					return getTextString(entry.getSourceEntity2());
 				case 2:
 					return getNumberString(entry.getSourceEntity2());
 				case 3:
@@ -338,7 +338,7 @@ public class DefaultTestView extends ViewPart {
 		column0.setResizable(true);
 		column0.pack();
 		TableColumn column1 = new TableColumn(tableViewer.getTable(),SWT.LEFT);
-		column1.setText("Source Method");
+		column1.setText("Class Test");
 		column1.setResizable(true);
 		column1.pack();
 		TableColumn column2 = new TableColumn(tableViewer.getTable(),SWT.LEFT);

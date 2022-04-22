@@ -116,31 +116,22 @@ public class DefaultTest extends AbstractSmell {
 
 	private class ClassVisitor extends VoidVisitorAdapter<Void> {
 		TestClass testClass;
-		@Override
-		public void visit(MethodDeclaration n, Void arg) {
-			
-			if (Util.isValidTestMethod(n)) {
-				//method should not be abstract
-                if (!n.isAbstract()) {
-                    if (n.getBody().isPresent()) {
-                        //get the total number of statements contained in the method
-                        if (n.getBody().get().getStatements().size() == 0) {
-//                            instanceEmpty.add(new MethodUsage(n.getNameAsString(),"",n.getRange().get().begin.line + "-" + n.getRange().get().end.line));
-                        	insertTestSmell(n.getRange().get(), n);
-                            return;
-                        }
-                    }
-                }
-			}
-		}
-
+		
+	 	@Override
+        public void visit(ClassOrInterfaceDeclaration n, Void arg) {
+            if (n.getNameAsString().equals("ExampleUnitTest") || n.getNameAsString().equals("ExampleInstrumentedTest")) {
+//                instanceDefault.add(new MethodUsage(n.getNameAsString(), "",n.getRange().get().begin.line + "-" + n.getRange().get().end.line));
+            	insertTestSmell(n.getRange().get(), n);
+            }
+            super.visit(n, arg);
+        }
 	}
-	public void insertTestSmell (Range range, MethodDeclaration testMethod) {
+	public void insertTestSmell (Range range, ClassOrInterfaceDeclaration testClass) {
 		cadaTestSmell = new TestSmellDescription("Default Test", 
 												 "Refactoring ...", 
 				 								 getFilePath(), 
 				 								 getClassName(),
-				 								 testMethod.getName() + "() \n" ,
+				 								 testClass.getName() + "() \n" ,
 				 								 range.begin.line + "", 
 				 								 range.end.line + "", 
 				 								 range.begin.line, 
@@ -148,7 +139,7 @@ public class DefaultTest extends AbstractSmell {
 		listTestSmells.add(cadaTestSmell);
 		String smellLocation;
 		smellLocation = "Classe " + getClassName() + "\n" + 
-						"Método " + testMethod.getName() + "() \n" + 
+						"Método " + testClass.getName() + "() \n" + 
 						"Begin " + range.begin.line + "\n" +
 						"End " + range.end.line;
 		System.out.println(smellLocation);
