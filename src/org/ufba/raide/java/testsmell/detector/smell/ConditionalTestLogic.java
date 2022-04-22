@@ -220,12 +220,12 @@ public class ConditionalTestLogic extends AbstractSmell {
 				 								 range.begin.line, 
 				 								 range.end.line);	
 		listTestSmells.add(cadaTestSmell);
-		String smellLocation;
-		smellLocation = "Classe " + getClassName() + "\n" + 
-						"Método " + testMethod.getElementName() + "() \n" + 
-						"Begin " + range.begin.line + "\n" +
-						"End " + range.end.line;
-		System.out.println(smellLocation);
+//		String smellLocation;
+//		smellLocation = "Classe " + getClassName() + "\n" + 
+//						"Método " + testMethod.getElementName() + "() \n" + 
+//						"Begin " + range.begin.line + "\n" +
+//						"End " + range.end.line;
+//		System.out.println(smellLocation);
 	}
 	
 	public String getClassName() {

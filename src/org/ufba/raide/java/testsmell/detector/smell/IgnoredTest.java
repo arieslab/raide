@@ -2,6 +2,8 @@ package org.ufba.raide.java.testsmell.detector.smell;
 
 import com.github.javaparser.Range;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.Modifier;
+import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.ConditionalExpr;
 import com.github.javaparser.ast.expr.MethodCallExpr;
@@ -23,6 +25,7 @@ import javax.swing.JOptionPane;
 import org.ufba.raide.java.refactoring.views.*;
 import org.ufba.raide.java.testsmell.AbstractSmell;
 import org.ufba.raide.java.testsmell.SmellyElement;
+import org.ufba.raide.java.testsmell.TestClass;
 import org.ufba.raide.java.testsmell.TestMethod;
 import org.ufba.raide.java.testsmell.TestSmellDescription;
 import org.ufba.raide.java.testsmell.Util;
@@ -38,7 +41,15 @@ public class IgnoredTest extends AbstractSmell {
 	String className;
 	String filePath;
 	
+	private boolean flag = false;
+    private ArrayList<MethodUsage> instanceIgnored;
 
+    @Override
+	public String getSmellName() {
+		return "Ignored Test";
+	}
+    
+ 
 	public String getFilePath() {
 		return filePath;
 	}
@@ -52,10 +63,6 @@ public class IgnoredTest extends AbstractSmell {
 		setFilePath(path);
 		smellyElementList = new ArrayList<>();
 		methodConditional = new ArrayList<>();
-	}
-	@Override
-	public String getSmellName() {
-		return "Conditional Test Logic";
 	}
 
 	/**
@@ -104,110 +111,52 @@ public class IgnoredTest extends AbstractSmell {
 
 	private class ClassVisitor extends VoidVisitorAdapter<Void> {
 		private MethodDeclaration currentMethod = null;
-		private int conditionCount, ifCount, switchCount, forCount, foreachCount, whileCount, doCount = 0;
 		TestMethod testMethod;
+		TestClass testClass;
+		
+		
+        /**
+         * The purpose of this method is to 'visit' all test methods in the test file.
+         */
+        @Override
+        public void visit(MethodDeclaration n, Void arg) {
 
-		@Override
-		public void visit(MethodDeclaration n, Void arg) {
-			
-			if (Util.isValidTestMethod(n)) {
-				currentMethod = n;
-				testMethod = new TestMethod(n.getNameAsString());
-				testMethod.setHasSmell(false); 
-				super.visit(n, arg);
-				
-				testMethod.setHasSmell(true);
+            //JUnit 4
+            //check if test method has Ignore annotation
+            if (n.getAnnotationByName("Test").isPresent()) {
+                if (n.getAnnotationByName("Ignore").isPresent() || flag) {
+//                    instanceIgnored.add(new MethodUsage(n.getNameAsString(), "",n.getRange().get().begin.line + "-" + n.getRange().get().end.line));
+                    insertTestSmell(n.getRange().get(), n);
+                    return;
+                }
+            }
 
-				currentMethod = null;
-                conditionCount = 0;
-                ifCount = 0;
-                switchCount = 0;
-                forCount = 0;
-                foreachCount = 0;
-                whileCount = 0;
-                doCount = 0;
-			}
-		}
-	
-
-		@Override
-		public void visit(IfStmt n, Void arg) {
-			super.visit(n, arg);
-			if (currentMethod != null) {
-			    ifCount++;
-			    methodConditional.add(new MethodUsage(currentMethod.getNameAsString(), "", n.getRange().get().begin.line + "-" + n.getRange().get().end.line));
-			    insertTestSmell(n.getRange().get(), this.testMethod);
-			}
-		}
-		
-		@Override
-		public void visit(SwitchStmt n, Void arg) {
-		    super.visit(n, arg);
-		    if (currentMethod != null) {
-		        switchCount++;
-		        methodConditional.add(new MethodUsage(currentMethod.getNameAsString(), "",n.getRange().get().begin.line + "-" + n.getRange().get().end.line));
-		        insertTestSmell(n.getRange().get(), this.testMethod);
-		    }
-		}
-		
-		@Override
-		public void visit(ConditionalExpr n, Void arg) {
-		    super.visit(n, arg);
-		    if (currentMethod != null) {
-		        conditionCount++;
-		        methodConditional.add(new MethodUsage(currentMethod.getNameAsString(), "",n.getRange().get().begin.line + "-" + n.getRange().get().end.line));
-		        insertTestSmell(n.getRange().get(), this.testMethod);
-		    }
-		}
-		
-		@Override
-		public void visit(ForStmt n, Void arg) {
-		    super.visit(n, arg);
-		    if (currentMethod != null) {
-		        forCount++;
-		        methodConditional.add(new MethodUsage(currentMethod.getNameAsString(), "", n.getRange().get().begin.line + "-" + n.getRange().get().end.line));
-		        insertTestSmell(n.getRange().get(), this.testMethod);
-		    }
-		}
-		
-		@Override
-		public void visit(ForeachStmt n, Void arg) {
-		    super.visit(n, arg);
-		    if (currentMethod != null) {
-		        foreachCount++;
-				methodConditional.add(new MethodUsage(currentMethod.getNameAsString(), "", n.getRange().get().begin.line + "-" + n.getRange().get().end.line));
-				insertTestSmell(n.getRange().get(), this.testMethod);
-		    }
-		}
-		
-		@Override
-		public void visit(WhileStmt n, Void arg) {
-		    super.visit(n, arg);
-		    if (currentMethod != null) {
-		        whileCount++;
-		        methodConditional.add(new MethodUsage(currentMethod.getNameAsString(), "", n.getRange().get().begin.line + "-" + n.getRange().get().end.line));
-		        insertTestSmell(n.getRange().get(), this.testMethod);
-		    }
-		}
-		
-		@Override
-		public void visit(DoStmt n, Void arg) {
-		    super.visit(n, arg);
-		    if (currentMethod != null) {
-		        doCount++;
-		        methodConditional.add(new MethodUsage(currentMethod.getNameAsString(), "", n.getRange().get().begin.line + "-" + n.getRange().get().end.line));
-		        insertTestSmell(n.getRange().get(), this.testMethod);
-		    }
-		}
-		
-
+            //JUnit 3
+            //check if test method is not public
+            if (n.getNameAsString().toLowerCase().startsWith("test")) {
+                if (!n.getModifiers().contains(Modifier.PUBLIC)) {
+//                    instanceIgnored.add(new MethodUsage(n.getNameAsString(), "",n.getRange().get().begin.line + "-" + n.getRange().get().end.line));
+                    insertTestSmell(n.getRange().get(), n);
+                    return;
+                }
+            }
+        }
+        
+        @Override
+        public void visit(ClassOrInterfaceDeclaration n, Void arg) {
+            if (n.getAnnotationByName("Ignore").isPresent()) {
+                testClass = new TestClass(n.getNameAsString());
+                flag = true;
+            }
+            super.visit(n, arg);
+        }
 	}
-	public void insertTestSmell (Range range, TestMethod testMethod) {
-		cadaTestSmell = new TestSmellDescription("Conditional Test Logic", 
-												 "Assertion Explanation", 
+	public void insertTestSmell (Range range, MethodDeclaration testMethod) {
+		cadaTestSmell = new TestSmellDescription("Ignored Test", 
+												 "....", 
 				 								 getFilePath(), 
 				 								 getClassName(),
-				 								 testMethod.getElementName() + "() \n" ,
+				 								 testMethod.getName() + "() \n" ,
 				 								 range.begin.line + "", 
 				 								 range.end.line + "", 
 				 								 range.begin.line, 
@@ -215,7 +164,7 @@ public class IgnoredTest extends AbstractSmell {
 		listTestSmells.add(cadaTestSmell);
 		String smellLocation;
 		smellLocation = "Classe " + getClassName() + "\n" + 
-						"Método " + testMethod.getElementName() + "() \n" + 
+						"Método " + testMethod.getName() + "() \n" + 
 						"Begin " + range.begin.line + "\n" +
 						"End " + range.end.line;
 		System.out.println(smellLocation);
