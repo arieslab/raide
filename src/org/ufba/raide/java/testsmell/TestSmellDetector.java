@@ -7,6 +7,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import org.apache.commons.lang3.StringUtils;
 import org.ufba.raide.java.refactoring.views.AssertionRouletteView;
 import org.ufba.raide.java.refactoring.views.DuplicateAssertView;
+import org.ufba.raide.java.refactoring.views.IgnoredTestView;
 import org.ufba.raide.java.refactoring.views.ConditionalTestLogicView;
 import org.ufba.raide.java.testsmell.detector.smell.*;
 
@@ -63,7 +64,9 @@ public class TestSmellDetector {
         else if (tipoTestSmell.equals(ConditionalTestLogicView.getMessageDialogTitle())) {
         	testSmells.add(new ConditionalTestLogic(getNameClass(), getFilePathClass()));        	
         }
-        
+        else if (tipoTestSmell.equals(IgnoredTestView.getMessageDialogTitle())) {
+        	testSmells.add(new IgnoredTest(getNameClass(), getFilePathClass()));        	
+        } 
     }
 
     /**
