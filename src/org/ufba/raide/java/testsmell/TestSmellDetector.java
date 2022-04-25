@@ -11,6 +11,7 @@ import org.ufba.raide.java.refactoring.views.EmptyTestView;
 import org.ufba.raide.java.refactoring.views.ExceptionCatchingThrowingView;
 import org.ufba.raide.java.refactoring.views.IgnoredTestView;
 import org.ufba.raide.java.refactoring.views.ConditionalTestLogicView;
+import org.ufba.raide.java.refactoring.views.ConstructionInstallationView;
 import org.ufba.raide.java.refactoring.views.DefaultTestView;
 import org.ufba.raide.java.testsmell.detector.smell.*;
 
@@ -60,6 +61,9 @@ public class TestSmellDetector {
         
         if (tipoTestSmell.equals(AssertionRouletteView.getMessageDialogTitle())) {
         	testSmells.add(new AssertionRoulette(getNameClass(), getFilePathClass()));        	
+        }
+        else if (tipoTestSmell.equals(ConstructionInstallationView.getMessageDialogTitle())) {
+        	testSmells.add(new ConstructionInstallation(getNameClass(), getFilePathClass()));        	
         }
         else if (tipoTestSmell.equals(DuplicateAssertView.getMessageDialogTitle())) {
         	testSmells.add(new DuplicateAssert(getNameClass(), getFilePathClass()));        	

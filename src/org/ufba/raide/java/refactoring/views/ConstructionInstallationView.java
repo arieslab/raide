@@ -140,7 +140,7 @@ import org.eclipse.ltk.ui.refactoring.RefactoringWizardOpenOperation;
 
 public class ConstructionInstallationView extends ViewPart {
 	
-	private static final String MESSAGE_DIALOG_TITLE = "Conditional Test Logic";
+	private static final String MESSAGE_DIALOG_TITLE = "Construction Installation";
 	private TableViewer tableViewer;
 	private TreeViewer treeViewer;
 	private Action identifyBadSmellsAction;
@@ -154,7 +154,7 @@ public class ConstructionInstallationView extends ViewPart {
 	private IType selectedType;
 	private CandidateRefactoring[] candidateRefactoringTable;
 	private IJavaProject project;
-	final String REFACTORING_DESCRIPTION = "Add Assertion Explanation";
+	final String REFACTORING_DESCRIPTION = "Refactoring ...";
 
 
     private List<TestSmellDescription> testSmells;
@@ -209,7 +209,7 @@ public class ConstructionInstallationView extends ViewPart {
 			switch(index){
 				case 0:
 					if(entry instanceof AddExplanationCandidateRefactoring)
-						return "Conditional Test Logic";
+						return "Construction Installation";
 					else
 						return "";
 				case 1:
@@ -570,7 +570,7 @@ public class ConstructionInstallationView extends ViewPart {
 				if(wasAlreadyOpen)
 					openPackageExplorerViewPart();
 				if (candidateRefactoringTable == null || candidateRefactoringTable.length == 0 ) {
-					JOptionPane.showMessageDialog(null, "Conditional Test Logic not found.");				
+					JOptionPane.showMessageDialog(null, "Construction Installation not found.");				
 				}
 			}
 		};
@@ -612,7 +612,7 @@ public class ConstructionInstallationView extends ViewPart {
 							annotationModel.removeAnnotation(currentAnnotation);
 						}
 					}
-					String texto = "Assertion Roulette occurs when a test method has multiple non-documented assertions. If one of the assertions fails, you do not know which one it is. Add Assertion Explanation to remove this smell.";
+					String texto = "Construction Installation occurs when ....";
 					for(Position position : positions) {
 						SliceAnnotation annotation = new SliceAnnotation(SliceAnnotation.EXTRACTION, texto);
 						annotationModel.addAnnotation(annotation, position);
@@ -667,7 +667,7 @@ public class ConstructionInstallationView extends ViewPart {
 							annotationModel.removeAnnotation(currentAnnotation);
 						}
 					}
-					String texto = "Assertion Roulette occurs when a test method has multiple non-documented assertions. If one of the assertions fails, you do not know which one it is. Add Assertion Explanation to remove this smell.";
+					String texto = "Construction Installation occurs when ...";
 					for(Position position : positions) {
 						SliceAnnotation annotation = new SliceAnnotation(SliceAnnotation.EXTRACTION, texto);
 						annotationModel.addAnnotation(annotation, position);
