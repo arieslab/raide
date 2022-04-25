@@ -36,11 +36,14 @@ public class ConstructionInstallation extends AbstractSmell {
 	ArrayList<TestSmellDescription> listTestSmells;
 	TestSmellDescription cadaTestSmell;	
 	private List<SmellyElement> smellyElementList;
+	private List<MethodUsage> methodConditional;
 	
 	String className;
 	String filePath;
 	
 	private boolean flag = false;
+    private ArrayList<MethodUsage> instanceIgnored;
+
     @Override
 	public String getSmellName() {
 		return "Construction Installation";
@@ -59,6 +62,7 @@ public class ConstructionInstallation extends AbstractSmell {
 		setClassName(name);
 		setFilePath(path);
 		smellyElementList = new ArrayList<>();
+		methodConditional = new ArrayList<>();
 	}
 
 	/**
@@ -114,21 +118,13 @@ public class ConstructionInstallation extends AbstractSmell {
             //JUnit 4
             //check if test method has Ignore annotation
             if (n.getAnnotationByName("Test").isPresent()) {
-                if (n.getAnnotationByName("Ignore").isPresent() || flag) {
-//                    instanceIgnored.add(new MethodUsage(n.getNameAsString(), "",n.getRange().get().begin.line + "-" + n.getRange().get().end.line));
-                    insertTestSmell(n.getRange().get(), n);
-                    return;
+                if (n.getAnnotationByName("Ignore").isPresent() || flag) {		
+                	return;
                 }
             }
-
-            //JUnit 3
-            //check if test method is not public
-            if (n.getNameAsString().toLowerCase().startsWith("test")) {
-                if (!n.getModifiers().contains(Modifier.PUBLIC)) {
-//                    instanceIgnored.add(new MethodUsage(n.getNameAsString(), "",n.getRange().get().begin.line + "-" + n.getRange().get().end.line));
-                    insertTestSmell(n.getRange().get(), n);
-                    return;
-                }
+            if (n.getName().asString().equals(getNameFileWithoutExtension())) {
+            	insertTestSmell(n.getRange().get(), n);
+            	return;
             }
         }
         
@@ -141,9 +137,13 @@ public class ConstructionInstallation extends AbstractSmell {
             super.visit(n, arg);
         }
 	}
+	private String getNameFileWithoutExtension() {
+		return className.replace(".java", "");
+	}
+	
 	public void insertTestSmell (Range range, MethodDeclaration testMethod) {
-		cadaTestSmell = new TestSmellDescription("ConstructionInstallation", 
-												 "Refactoring....", 
+		cadaTestSmell = new TestSmellDescription("Ignored Test", 
+												 "....", 
 				 								 getFilePath(), 
 				 								 getClassName(),
 				 								 testMethod.getName() + "() \n" ,
