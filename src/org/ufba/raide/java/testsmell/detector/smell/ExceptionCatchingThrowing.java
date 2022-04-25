@@ -2,8 +2,6 @@ package org.ufba.raide.java.testsmell.detector.smell;
 
 import com.github.javaparser.Range;
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.Modifier;
-import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.ConditionalExpr;
 import com.github.javaparser.ast.expr.MethodCallExpr;
@@ -12,6 +10,7 @@ import com.github.javaparser.ast.stmt.ForStmt;
 import com.github.javaparser.ast.stmt.ForeachStmt;
 import com.github.javaparser.ast.stmt.IfStmt;
 import com.github.javaparser.ast.stmt.SwitchStmt;
+import com.github.javaparser.ast.stmt.TryStmt;
 import com.github.javaparser.ast.stmt.WhileStmt;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 
@@ -25,7 +24,6 @@ import javax.swing.JOptionPane;
 import org.ufba.raide.java.refactoring.views.*;
 import org.ufba.raide.java.testsmell.AbstractSmell;
 import org.ufba.raide.java.testsmell.SmellyElement;
-import org.ufba.raide.java.testsmell.TestClass;
 import org.ufba.raide.java.testsmell.TestMethod;
 import org.ufba.raide.java.testsmell.TestSmellDescription;
 import org.ufba.raide.java.testsmell.Util;
@@ -40,13 +38,10 @@ import org.ufba.raide.java.testsmell.Util;
 
 public class ExceptionCatchingThrowing extends AbstractSmell {
 	
-	private ArrayList<MethodUsage> instanceEmpty;
-	
-	private boolean flag = false;
-	
 	ArrayList<TestSmellDescription> listTestSmells;
 	TestSmellDescription cadaTestSmell;	
 	private List<SmellyElement> smellyElementList;
+	private List<MethodUsage> methodConditional;
 	
 	String className;
 	String filePath;
@@ -64,6 +59,7 @@ public class ExceptionCatchingThrowing extends AbstractSmell {
 		setClassName(name);
 		setFilePath(path);
 		smellyElementList = new ArrayList<>();
+		methodConditional = new ArrayList<>();
 	}
 	@Override
 	public String getSmellName() {
@@ -115,34 +111,53 @@ public class ExceptionCatchingThrowing extends AbstractSmell {
 	}
 
 	private class ClassVisitor extends VoidVisitorAdapter<Void> {
-		TestClass testClass;
-		
-	 	@Override
-        public void visit(ClassOrInterfaceDeclaration n, Void arg) {
-            if (n.getNameAsString().equals("ExampleUnitTest") || n.getNameAsString().equals("ExampleInstrumentedTest")) {
-//                instanceDefault.add(new MethodUsage(n.getNameAsString(), "",n.getRange().get().begin.line + "-" + n.getRange().get().end.line));
-            	insertTestSmell(n.getRange().get(), n);
-            }
-            super.visit(n, arg);
-        }
+		private MethodDeclaration currentMethod = null;
+		TestMethod testMethod;
+
+		@Override
+		public void visit(MethodDeclaration n, Void arg) {
+			
+			if (Util.isValidTestMethod(n)) {
+				currentMethod = n;
+				testMethod = new TestMethod(n.getNameAsString());
+				testMethod.setHasSmell(false); 
+				super.visit(n, arg);
+				
+				testMethod.setHasSmell(true);
+
+				currentMethod = null;
+			}
+		}
+		@Override
+		public void visit(TryStmt n, Void arg) {
+			insertTestSmell(n.getRange().get(), this.testMethod);
+		}
+
+//		@Override
+//		public void visit(IfStmt n, Void arg) {
+//			super.visit(n, arg);
+//			if (currentMethod != null) {
+//			    
+//			}
+//		}
 	}
-	public void insertTestSmell (Range range, ClassOrInterfaceDeclaration testClass) {
-		cadaTestSmell = new TestSmellDescription("Exception Catching Throwing", 
-												 "Refactoring ...", 
+	public void insertTestSmell (Range range, TestMethod testMethod) {
+		cadaTestSmell = new TestSmellDescription("Conditional Test Logic", 
+												 "Assertion Explanation", 
 				 								 getFilePath(), 
 				 								 getClassName(),
-				 								 testClass.getName() + "() \n" ,
+				 								 testMethod.getElementName() + "() \n" ,
 				 								 range.begin.line + "", 
 				 								 range.end.line + "", 
 				 								 range.begin.line, 
 				 								 range.end.line);	
 		listTestSmells.add(cadaTestSmell);
-		String smellLocation;
-		smellLocation = "Classe " + getClassName() + "\n" + 
-						"Método " + testClass.getName() + "() \n" + 
-						"Begin " + range.begin.line + "\n" +
-						"End " + range.end.line;
-		System.out.println(smellLocation);
+//		String smellLocation;
+//		smellLocation = "Classe " + getClassName() + "\n" + 
+//						"Método " + testMethod.getElementName() + "() \n" + 
+//						"Begin " + range.begin.line + "\n" +
+//						"End " + range.end.line;
+//		System.out.println(smellLocation);
 	}
 	
 	public String getClassName() {
