@@ -215,13 +215,15 @@ public class GeneralFixtureView extends ViewPart {
 				case 1:
 					return getTextString(entry.getSourceEntity2()) + "( )";
 				case 2:
-					return getNumberString(entry.getSourceEntity2());
+					return getNumberString(entry.getField());
 				case 3:
-					return String.valueOf(entry.getPosition().offset);
+					return getNumberString(entry.getSourceEntity2());
 				case 4:
+					return String.valueOf(entry.getPosition().offset);
+				case 5:
 					return entry.getSourceClass().getFilePath();
 					//return "Caminho do arquivo";
-				case 5:
+				case 6:
 					return REFACTORING_DESCRIPTION;
 				default:
 					return "";
@@ -313,10 +315,11 @@ public class GeneralFixtureView extends ViewPart {
 		/* Ordem de apresentação:
 		 * 1a Coluna: TestSmell
 		 * 2a Coluna: Source Method
-		 * 3a Coluna: Linha inicial
-		 * 4a Coluna: Linha final
-		 * 5a Coluna: Refactoring Type		 * 
-		 * 6a Coluna: Caminho do arquivo
+		 * 3a Coluna: Field
+		 * 4a Coluna: Linha inicial
+		 * 5a Coluna: Linha final
+		 * 6a Coluna: Refactoring Type		 * 
+		 * 7a Coluna: Caminho do arquivo
 		 * */
 		tableViewer = new TableViewer(parent, SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER | SWT.FULL_SELECTION);
 		tableViewer.setContentProvider(new ViewContentProvider());
@@ -326,6 +329,7 @@ public class GeneralFixtureView extends ViewPart {
 		TableLayout layout = new TableLayout();
 		layout.addColumnData(new ColumnWeightData(15, true));
 		layout.addColumnData(new ColumnWeightData(25, true));
+		layout.addColumnData(new ColumnWeightData(15, true));
 		layout.addColumnData(new ColumnWeightData(8, true));
 		layout.addColumnData(new ColumnWeightData(8, true));
 		layout.addColumnData(new ColumnWeightData(15, true));
@@ -342,21 +346,25 @@ public class GeneralFixtureView extends ViewPart {
 		column1.setResizable(true);
 		column1.pack();
 		TableColumn column2 = new TableColumn(tableViewer.getTable(),SWT.LEFT);
-		column2.setText("Begin");
+		column2.setText("Field");
 		column2.setResizable(true);
 		column2.pack();
 		TableColumn column3 = new TableColumn(tableViewer.getTable(),SWT.LEFT);
-		column3.setText("End");
+		column3.setText("Begin");
 		column3.setResizable(true);
 		column3.pack();
 		TableColumn column4 = new TableColumn(tableViewer.getTable(),SWT.LEFT);
-		column4.setText("File Path");
+		column4.setText("End");
 		column4.setResizable(true);
 		column4.pack();
 		TableColumn column5 = new TableColumn(tableViewer.getTable(),SWT.LEFT);
-		column5.setText("Refactoring Type");
+		column5.setText("File Path");
 		column5.setResizable(true);
 		column5.pack();
+		TableColumn column6 = new TableColumn(tableViewer.getTable(),SWT.LEFT);
+		column6.setText("Refactoring Type");
+		column6.setResizable(true);
+		column6.pack();
 		
 		
 		tableViewer.addSelectionChangedListener(new ISelectionChangedListener() {

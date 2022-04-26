@@ -252,7 +252,8 @@ public class GeneralFixture extends AbstractSmell {
 				 								 range.begin.line + "", 
 				 								 range.end.line + "", 
 				 								 range.begin.line, 
-				 								 range.end.line);	
+				 								 range.end.line,
+				 								 field.getProductionMethodName());	
 		listTestSmells.add(cadaTestSmell);
 //		String smellLocation;
 //		smellLocation = "Classe " + getClassName() + "\n" + 

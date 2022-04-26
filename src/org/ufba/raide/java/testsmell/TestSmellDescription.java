@@ -11,6 +11,7 @@ public class TestSmellDescription {
 	String linePositionEnd;
 	int beginMethod;
 	int endMethod;
+	String field;
 	
 	public int getBeginMethod() {
 		return beginMethod;
@@ -25,7 +26,7 @@ public class TestSmellDescription {
 		this.endMethod = endMethod;
 	}
 	public TestSmellDescription(String testSmellType, String testSmellRefactoring, String filePath, 
-			String className, String methodName, String linePositionBegin,  String linePositionEnd, int beginMethod, int endMethod) {
+			String className, String methodName, String linePositionBegin,  String linePositionEnd, int beginMethod, int endMethod, String field) {
 		
 		this.testSmellType = testSmellType;
 		this.testSmellRefactoring = testSmellRefactoring;
@@ -36,9 +37,10 @@ public class TestSmellDescription {
 		this.linePositionEnd = linePositionEnd;		
 		this.beginMethod = beginMethod;
 		this.endMethod = endMethod;
+		this.field = field;
 	}
 	public TestSmellDescription() {
-		new TestSmellDescription("", "", "", "", "", "", "", 0, 0);		
+		new TestSmellDescription("", "", "", "", "", "", "", 0, 0, "");		
 	}	
 	
 	
@@ -85,5 +87,10 @@ public class TestSmellDescription {
 		this.linePositionEnd = linePositionEnd;
 	}
 	
-	
+	public String getField() {
+		return field;
+	}
+	public void setField(String field) {
+		this.field = field;
+	}
 }

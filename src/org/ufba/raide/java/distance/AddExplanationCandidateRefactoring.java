@@ -46,6 +46,7 @@ public class AddExplanationCandidateRefactoring extends CandidateRefactoring imp
     private Integer userRate;
     private String lineNumber;
     private Position position;
+    private String field;
     
     public String getLineNumber() {
 		return lineNumber;
@@ -503,6 +504,11 @@ public class AddExplanationCandidateRefactoring extends CandidateRefactoring imp
 	public String getMethod() {
 		return null;
 	}
+	@Override
+	public String getField() {
+		return "";
+	}
+	
 	
 	
 	

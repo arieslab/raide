@@ -211,7 +211,8 @@ public class AssertionRoulette extends AbstractSmell {
 															 n.getRange().get().begin.line + "", 
 															 n.getRange().get().begin.line + "", 
 															 n.getRange().get().begin.line, 
-															 n.getRange().get().end.line);	
+															 n.getRange().get().end.line,
+															 "");	
 					listTestSmells.add(cadaTestSmell);
 					String smellLocation;
 					smellLocation = "Classe " + getClassName() + "\n" +

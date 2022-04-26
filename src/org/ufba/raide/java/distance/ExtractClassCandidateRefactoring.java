@@ -411,5 +411,11 @@ public class ExtractClassCandidateRefactoring extends CandidateRefactoring imple
 		// TODO Auto-generated method stub
 		
 	}
+	@Override
+	public String getField() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
 
 }

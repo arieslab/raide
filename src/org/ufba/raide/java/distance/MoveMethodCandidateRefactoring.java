@@ -387,4 +387,10 @@ public class MoveMethodCandidateRefactoring extends CandidateRefactoring impleme
 		// TODO Auto-generated method stub
 		
 	}
+	@Override
+	public String getField() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
 }

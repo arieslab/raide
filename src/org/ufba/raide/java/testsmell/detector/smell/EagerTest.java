@@ -31,7 +31,7 @@ import org.ufba.raide.java.testsmell.TestSmellDescription;
 import org.ufba.raide.java.testsmell.Util;
 
 
-public class IgnoredTest extends AbstractSmell {
+public class EagerTest extends AbstractSmell {
 	
 	ArrayList<TestSmellDescription> listTestSmells;
 	TestSmellDescription cadaTestSmell;	
@@ -46,7 +46,7 @@ public class IgnoredTest extends AbstractSmell {
 
     @Override
 	public String getSmellName() {
-		return "Ignored Test";
+		return "Eager Test";
 	}
     
  
@@ -58,7 +58,7 @@ public class IgnoredTest extends AbstractSmell {
 		this.filePath = filePath;
 	}	
 
-	public IgnoredTest(String name, String path) {
+	public EagerTest(String name, String path) {
 		setClassName(name);
 		setFilePath(path);
 		smellyElementList = new ArrayList<>();
@@ -93,8 +93,8 @@ public class IgnoredTest extends AbstractSmell {
 		
 		listTestSmells = new ArrayList<TestSmellDescription>();
 		
-		IgnoredTest.ClassVisitor classVisitor;
-		classVisitor = new IgnoredTest.ClassVisitor();
+		EagerTest.ClassVisitor classVisitor;
+		classVisitor = new EagerTest.ClassVisitor();
 		classVisitor.visit(testFileCompilationUnit, null);
 		
 		return listTestSmells;

@@ -150,7 +150,8 @@ public class ExceptionCatchingThrowing extends AbstractSmell {
 				 								 range.begin.line + "", 
 				 								 range.end.line + "", 
 				 								 range.begin.line, 
-				 								 range.end.line);	
+				 								 range.end.line,
+												 "");	
 		listTestSmells.add(cadaTestSmell);
 //		String smellLocation;
 //		smellLocation = "Classe " + getClassName() + "\n" + 
