@@ -1,17 +1,16 @@
 package org.ufba.raide.java.refactoring.views;
 
-import java.awt.Color;
-import java.awt.Window;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.net.URL;
@@ -29,6 +28,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.Set;
 
 import javax.swing.JOptionPane;
@@ -45,8 +45,6 @@ import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
-import org.eclipse.swt.widgets.Tree;
-import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.ui.part.*;
 import org.eclipse.ui.progress.IProgressService;
 import org.apache.commons.lang3.text.StrTokenizer;
@@ -54,7 +52,6 @@ import org.eclipse.core.commands.operations.IOperationHistoryListener;
 import org.eclipse.core.commands.operations.OperationHistoryEvent;
 import org.eclipse.core.internal.runtime.LocalizationUtils;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -100,8 +97,7 @@ import org.ufba.raide.java.clone.parsers.CloneInstance;
 import org.ufba.raide.java.distance.AddExplanationCandidateRefactoring;
 import org.ufba.raide.java.distance.CandidateRefactoring;
 import org.ufba.raide.java.distance.DistanceMatrix;
-import org.ufba.raide.java.distance.ExtractClassCandidateGroup;
-import org.ufba.raide.java.distance.ExtractClassCandidateRefactoring;
+import org.ufba.raide.java.distance.MethodExtractionCandidateRefactoring;
 import org.ufba.raide.java.distance.MyClass;
 import org.ufba.raide.java.distance.MyMethod;
 import org.ufba.raide.java.distance.MySystem;
@@ -112,10 +108,9 @@ import org.ufba.raide.java.filedetector.TrataStringCaminhoTeste;
 import org.ufba.raide.java.filemapping.FileMappingMain;
 import org.ufba.raide.java.preferences.PreferenceConstants;
 import org.ufba.raide.java.refactoring.manipulators.ASTSlice;
-import org.ufba.raide.java.refactoring.manipulators.ExtractClassRefactoring;
 import org.ufba.raide.java.refactoring.manipulators.MoveMethodRefactoring;
+import org.ufba.raide.java.refactoring.views.AssertionRouletteView.AssertionParenteseLine;
 import org.ufba.raide.java.refactoring.views.CodeSmellPackageExplorer.CodeSmellType;
-import org.ufba.raide.java.refactoring.views.DuplicateAssertView.ViewContentProvider;
 import org.ufba.raide.java.testsmell.AbstractSmell;
 import org.ufba.raide.java.testsmell.ResultsWriter;
 import org.ufba.raide.java.testsmell.TestFile;
@@ -127,12 +122,9 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.IWorkingCopy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.internal.core.builder.SourceFile;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.ltk.core.refactoring.Refactoring;
@@ -146,6 +138,7 @@ public class LazyTestView extends ViewPart {
 	private Action identifyBadSmellsAction;
 	private Action doubleClickAction;
 	private Action applyRefactoringAction;
+	private Action packageExplorerAction;
 	private IJavaProject selectedProject;
 	private IJavaProject activeProject;
 	private IPackageFragmentRoot selectedPackageFragmentRoot;
@@ -154,14 +147,13 @@ public class LazyTestView extends ViewPart {
 	private IType selectedType;
 	private CandidateRefactoring[] candidateRefactoringTable;
 	private IJavaProject project;
-	final String REFACTORING_DESCRIPTION = "Add Assertion Explanation";
+	private static int numMaximoDuplicate = 0;
 
-
-    private List<TestSmellDescription> testSmells;
-    
     public static String getMessageDialogTitle() {
 		return MESSAGE_DIALOG_TITLE;
 	}
+
+	private List<TestSmellDescription> testSmells;
     
     private String getNumberString(String myText) {
     	int tam = myText.length();
@@ -169,7 +161,7 @@ public class LazyTestView extends ViewPart {
     	String novaString = "";
     	
     	for (int i = 0; i < tam; i++ ) {    		
-    		if (Character.isDigit(vetor[i]))
+    		if (Character.isDigit(vetor[i]) || (vetor[i] == ',') || (vetor[i] == ' '))
     			novaString += vetor[i]; 	
     	}
     	
@@ -208,21 +200,16 @@ public class LazyTestView extends ViewPart {
 			CandidateRefactoring entry = (CandidateRefactoring)obj;
 			switch(index){
 				case 0:
-					if(entry instanceof AddExplanationCandidateRefactoring)
+					if(entry instanceof MethodExtractionCandidateRefactoring)
 						return "Lazy Test";
-					else
-						return "";
 				case 1:
 					return getTextString(entry.getSourceEntity2()) + "( )";
 				case 2:
 					return getNumberString(entry.getSourceEntity2());
 				case 3:
-					return String.valueOf(entry.getPosition().offset);
-				case 4:
 					return entry.getSourceClass().getFilePath();
-					//return "Caminho do arquivo";
-				case 5:
-					return REFACTORING_DESCRIPTION;
+				case 4:
+					return "Raf ...";
 				default:
 					return "";
 			}
@@ -238,9 +225,7 @@ public class LazyTestView extends ViewPart {
 	}
 	class NameSorter extends ViewerSorter {
 		public int compare(Viewer viewer, Object obj1, Object obj2) {
-			AddExplanationCandidateRefactoring candidate1 = (AddExplanationCandidateRefactoring)obj1;
-			AddExplanationCandidateRefactoring candidate2 = (AddExplanationCandidateRefactoring)obj2;
-			return candidate1.compareTo(candidate2);
+			return 1;
 		}
 	}
 
@@ -291,14 +276,14 @@ public class LazyTestView extends ViewPart {
 				}
 				if(javaProject != null && element instanceof IPackageFragmentRoot) {
 					setProject(javaProject);
-					//Primeiro verifica se o diretório do pacote 
+					//Primeiro verifica se o diret�rio do pacote 
 					IPackageFragmentRoot packageFragmentRoot = (IPackageFragmentRoot)element;
 					String diretorioPacote = packageFragmentRoot.getResource().getLocation().toString();
 
-					//Depois verificados se é um pacote válido
+					//Depois verificados se � um pacote v�lido
 					boolean valido = new TrataStringCaminhoTeste().diretorioTesteValido(diretorioPacote);
 					
-					//Se for válido, ativamos a opção
+					//Se for v�lido, ativamos a op��o
 					identifyBadSmellsAction.setEnabled(valido);						
 				}
 			}
@@ -310,13 +295,12 @@ public class LazyTestView extends ViewPart {
 	 * to create the viewer and initialize it.
 	 */
 	public void createPartControl(Composite parent) {
-		/* Ordem de apresentação:
-		 * 1a Coluna: TestSmell
-		 * 2a Coluna: Source Method
-		 * 3a Coluna: Linha inicial
-		 * 4a Coluna: Linha final
-		 * 5a Coluna: Refactoring Type		 * 
-		 * 6a Coluna: Caminho do arquivo
+		/* Ordem de apresenta��o:
+		 * 1� Coluna: TestSmell
+		 * 2� Coluna: Source Method
+		 * 3� Coluna: Linha
+		 * 4� Coluna: Refactoring Type		 * 
+		 * 5� Coluna: Caminho do arquivo
 		 * */
 		tableViewer = new TableViewer(parent, SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER | SWT.FULL_SELECTION);
 		tableViewer.setContentProvider(new ViewContentProvider());
@@ -326,7 +310,6 @@ public class LazyTestView extends ViewPart {
 		TableLayout layout = new TableLayout();
 		layout.addColumnData(new ColumnWeightData(15, true));
 		layout.addColumnData(new ColumnWeightData(25, true));
-		layout.addColumnData(new ColumnWeightData(8, true));
 		layout.addColumnData(new ColumnWeightData(8, true));
 		layout.addColumnData(new ColumnWeightData(15, true));
 		layout.addColumnData(new ColumnWeightData(20, true));
@@ -338,25 +321,21 @@ public class LazyTestView extends ViewPart {
 		column0.setResizable(true);
 		column0.pack();
 		TableColumn column1 = new TableColumn(tableViewer.getTable(),SWT.LEFT);
-		column1.setText("Source Method");
+		column1.setText("Production Method");
 		column1.setResizable(true);
 		column1.pack();
 		TableColumn column2 = new TableColumn(tableViewer.getTable(),SWT.LEFT);
-		column2.setText("Begin");
+		column2.setText("Lines");
 		column2.setResizable(true);
 		column2.pack();
 		TableColumn column3 = new TableColumn(tableViewer.getTable(),SWT.LEFT);
-		column3.setText("End");
+		column3.setText("File Path");
 		column3.setResizable(true);
 		column3.pack();
 		TableColumn column4 = new TableColumn(tableViewer.getTable(),SWT.LEFT);
-		column4.setText("File Path");
+		column4.setText("Refactoring Type");
 		column4.setResizable(true);
 		column4.pack();
-		TableColumn column5 = new TableColumn(tableViewer.getTable(),SWT.LEFT);
-		column5.setText("Refactoring Type");
-		column5.setResizable(true);
-		column5.pack();
 		
 		
 		tableViewer.addSelectionChangedListener(new ISelectionChangedListener() {
@@ -498,7 +477,7 @@ public class LazyTestView extends ViewPart {
 		manager.add(identifyBadSmellsAction);
 		manager.add(applyRefactoringAction);
 	}
-	private void callAssertionRoulette() throws IOException{
+	private void callDuplicateAssert() throws IOException{
 		TestSmellDetector testSmellDetector = TestSmellDetector.createTestSmellDetector(getMessageDialogTitle());
         BufferedReader in = null;
         
@@ -510,14 +489,16 @@ public class LazyTestView extends ViewPart {
         /* ********************    N�AAO APAGAR ******************
          * TestFileDetectorMain.detect(strURIFinal);
          * FileMappingMain.detect(strURIFinal);
-         * */  
+         * */   
 		
 		TestFileDetectorMain.detect(RAIDEUtils.firstPathSeparator() + strURIFinal);
-        FileMappingMain.detect(RAIDEUtils.firstPathSeparator() + strURIFinal);
-		
+        FileMappingMain.detect(RAIDEUtils.firstPathSeparator() + strURIFinal);		
+        
         // retorna \\ se for windows, ou / caso não for
         String nameFile = RAIDEUtils.firstPathSeparator() + strURIFinal + 
         		RAIDEUtils.pathSeparator() + new TrataStringCaminhoTeste().getFILE_MAPPING();
+        
+        //String nameFile = strURIFinal+ RAIDEUtils.pathSeparator() + new TrataStringCaminhoTeste().getFILE_MAPPING();
                 
 		try {			
 			in = new BufferedReader(new FileReader(nameFile));
@@ -549,6 +530,35 @@ public class LazyTestView extends ViewPart {
         System.out.println("end");
 		
 	}
+	
+	private ArrayList<Integer> extraiNumeroLinhas(String todasLinhas){
+		ArrayList<Integer> num = new ArrayList<Integer>();
+		char[] stringToCharArray = todasLinhas.toCharArray();
+		String aux = "";
+		
+		int inicio = 0;
+		int fim = -1;
+		for (int i = 0; i < todasLinhas.length(); i++) {
+			if (stringToCharArray[i] == ',') {
+				inicio = fim + 1;
+				fim = i - 1;
+				aux = "";
+				for (int j = inicio; j <= fim; j++) {
+					aux += stringToCharArray[j];
+				}
+				num.add(Integer.valueOf(aux.toString()));
+				fim = i + 1;
+			}
+		}
+		aux = "";
+		for (int j = fim + 1; j < todasLinhas.length(); j++) {
+			aux += stringToCharArray[j];
+		}
+		num.add(Integer.valueOf(aux.toString()));
+
+		return num;
+	}
+	
 
 	private void makeActions() {
 		identifyBadSmellsAction = new Action() {
@@ -561,16 +571,17 @@ public class LazyTestView extends ViewPart {
 					page.hideView(viewPart);
 					wasAlreadyOpen = true;
 				}
-				
+		
 				activeProject = getProject();
 				CompilationUnitCache.getInstance().clearCache();
 				candidateRefactoringTable = getTable();
 					
 				tableViewer.setContentProvider(new ViewContentProvider());
+				packageExplorerAction.setEnabled(true);
 				if(wasAlreadyOpen)
 					openPackageExplorerViewPart();
 				if (candidateRefactoringTable == null || candidateRefactoringTable.length == 0 ) {
-					JOptionPane.showMessageDialog(null, "Conditional Test Logic not found.");				
+					JOptionPane.showMessageDialog(null, "Duplicate Asserts not found.");				
 				}
 			}
 		};
@@ -578,7 +589,20 @@ public class LazyTestView extends ViewPart {
 		identifyBadSmellsAction.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages().
 				getImageDescriptor(ISharedImages.IMG_OBJS_INFO_TSK));
 		identifyBadSmellsAction.setEnabled(false);
-		
+
+		packageExplorerAction = new Action(){
+			public void run() {
+				
+				IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
+				IViewPart viewPart = page.findView(CodeSmellPackageExplorer.ID);
+				if(viewPart == null/* || !CodeSmellPackageExplorer.CODE_SMELL_TYPE.equals(CodeSmellType.FEATURE_ENVY)*/)
+					openPackageExplorerViewPart();
+			}
+		};
+		packageExplorerAction.setToolTipText("Code Smell Package Explorer");
+		packageExplorerAction.setImageDescriptor(Activator.getImageDescriptor("/icons/" + "compass.png"));
+		packageExplorerAction.setEnabled(false);
+
 		doubleClickAction = new Action() {
 			public void run() {
 				IStructuredSelection selection = (IStructuredSelection)tableViewer.getSelection();
@@ -597,10 +621,16 @@ public class LazyTestView extends ViewPart {
 					ITextEditor sourceEditor = (ITextEditor)JavaUI.openInEditor(sourceJavaElement);
 					ArrayList<Position> positions = new ArrayList<Position>();
 					
-					int num = 0;
-					num = Integer.valueOf(candidate.getLineNumber());
+					//int num = 0;
+
+					ArrayList<Integer> num = extraiNumeroLinhas(candidate.getLineNumber());
+							 
+					//num = Integer.valueOf(candidate.getLineNumber());
 					try {
-						positions.add(getPositioAssertion(filePath, num));
+						//positions.add(getPositioAssertion(filePath, num));
+						for (int i = 0; i < num.size(); i ++) {
+							positions.add(getPositioAssertion(filePath, num.get(i)));
+						}
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
@@ -612,7 +642,7 @@ public class LazyTestView extends ViewPart {
 							annotationModel.removeAnnotation(currentAnnotation);
 						}
 					}
-					String texto = "Assertion Roulette occurs when a test method has multiple non-documented assertions. If one of the assertions fails, you do not know which one it is. Add Assertion Explanation to remove this smell.";
+					String texto = "Duplicate Assert occurs when a test method tests for the same condition multiple times within the same test method. If the test method needs to test the same condition using different values, a new test method should be created. ";
 					for(Position position : positions) {
 						SliceAnnotation annotation = new SliceAnnotation(SliceAnnotation.EXTRACTION, texto);
 						annotationModel.addAnnotation(annotation, position);
@@ -632,10 +662,10 @@ public class LazyTestView extends ViewPart {
 			}
 		};
 		
-		
 		applyRefactoringAction = new Action() {
 			
 			public void run() {
+				numMaximoDuplicate = 0;
 				IStructuredSelection selection = (IStructuredSelection)tableViewer.getSelection();
 				CandidateRefactoring candidate = (CandidateRefactoring)selection.getFirstElement();
 				
@@ -646,19 +676,33 @@ public class LazyTestView extends ViewPart {
 				IFile[] files = ResourcesPlugin.getWorkspace().getRoot().findFilesForLocationURI(location);					
 				IFile sourceFile = files[0];
 				
-				try {
-				
-					IJavaElement sourceJavaElement = JavaCore.create(sourceFile);
-					ITextEditor sourceEditor = (ITextEditor)JavaUI.openInEditor(sourceJavaElement);
-					ArrayList<Position> positions = new ArrayList<Position>();
+				int linhaInicialMetodo = candidate.getBeginMethod();
+				int linhaFinalMetodo = candidate.getEndMethod();
+				int tamanhoVetor = linhaFinalMetodo - linhaInicialMetodo + 1;
+				int vetorLinhas[] = new int[tamanhoVetor];
+				String nomeMetodo = getTextString(candidate.getSourceEntity2()) + "( )";
+				List<TestSmellDescription> lista = extraiSmellsMetodo(nomeMetodo);
+				vetorLinhas = mapeiaAsserDuplicados(tamanhoVetor, lista, linhaInicialMetodo);
+				//MapearLinahs
+				try {					 
+					String newMethods = copyMethod(filePath, linhaInicialMetodo, linhaFinalMetodo);
+					String oldMethod = newMethods;
+					String oldMethodCommented = "\t/* \n" + oldMethod + "*/ \n \n" + "\t/* Refactored method by RAIDE */\n";
+	
+					oldMethod = oldMethodCommented + eliminaDuplicaoes(oldMethod, vetorLinhas);
+					//oldMethod = eliminaDuplicaoes(oldMethod, vetorLinhas);
+					newMethods = createNewMethods(newMethods, vetorLinhas, nomeMetodo);
 					
-					int num = 0;
-					num = Integer.valueOf(candidate.getLineNumber());
+					ArrayList<Position> positions = new ArrayList<Position>();
 					try {
-						positions.add(getPositioAssertion(filePath, num));
+						positions.add(getPositioMethod(filePath, linhaInicialMetodo, linhaFinalMetodo));
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
+					//*********************************
+					IJavaElement sourceJavaElement = JavaCore.create(sourceFile);
+					ITextEditor sourceEditor = (ITextEditor)JavaUI.openInEditor(sourceJavaElement);
+					
 					AnnotationModel annotationModel = (AnnotationModel)sourceEditor.getDocumentProvider().getAnnotationModel(sourceEditor.getEditorInput());
 					Iterator<Annotation> annotationIterator = annotationModel.getAnnotationIterator();
 					while(annotationIterator.hasNext()) {
@@ -667,53 +711,38 @@ public class LazyTestView extends ViewPart {
 							annotationModel.removeAnnotation(currentAnnotation);
 						}
 					}
-					String texto = "Assertion Roulette occurs when a test method has multiple non-documented assertions. If one of the assertions fails, you do not know which one it is. Add Assertion Explanation to remove this smell.";
+					String texto = "Duplicate Assert occurs when a test method tests for the same condition multiple times within the same test method. If the test method needs to test the same condition using different values, a new test method should be created. ";
+					
 					for(Position position : positions) {
 						SliceAnnotation annotation = new SliceAnnotation(SliceAnnotation.EXTRACTION, texto);
 						annotationModel.addAnnotation(annotation, position);
 					}
 					Position firstPosition = positions.get(0);
-					Position lastPosition = positions.get(positions.size()-1);
 					int offset = firstPosition.getOffset();
-					int length = lastPosition.getOffset() + lastPosition.getLength() - firstPosition.getOffset();
-					sourceEditor.setHighlightRange(offset, length, true);
+					int length = firstPosition.getLength() + vetorLinhas.length;
+					//sourceEditor.setHighlightRange(offset, length, true);
+					
 					
 					IDocumentProvider docProvider = sourceEditor.getDocumentProvider();
 					IDocument classeDocument = docProvider.getDocument(sourceEditor.getEditorInput());
 					
 					try {
-						String teste = explanationNoEmpty(filePath, num);
-						classeDocument.replace(offset-1, length, teste);
-					} catch (IOException e1) {
-						// TODO Auto-generated catch block
+						classeDocument.replace(offset, length, oldMethod + newMethods);	
+						docProvider.saveDocument(new NullProgressMonitor(), new FileEditorInput(sourceFile), classeDocument, true);
+						//sourceEditor.setHighlightRange(offset, length, true);	
+					} catch (BadLocationException | CoreException e1) {
 						e1.printStackTrace();
 					}
 					
-					// Salvar aquivo
-					// Refirecionar para a posicao
-				    final IDocument doc = docProvider.getDocument(sourceEditor.getEditorInput());
-				   	try {
-						docProvider.saveDocument(new NullProgressMonitor(), new FileEditorInput(sourceFile), classeDocument, true);
-						AssertionParenteseLine parentese = getParentesesPosition(filePath, num);
-						String refactoringText = "\"" + REFACTORING_DESCRIPTION +" here" + "\", ";
-						classeDocument.replace(offset-1, parentese.position+1, parentese.textBeforeParentese + refactoringText);
-						docProvider.saveDocument(new NullProgressMonitor(), new FileEditorInput(sourceFile), classeDocument, true);
-					   	doubleClickAction.run();
-				   	} catch (CoreException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				   	
-//				   	IStructuredSelection selection = (IStructuredSelection)tableViewer.getSelection();
-//					CandidateRefactoring candidate = (CandidateRefactoring)selection.getFirstElement();
-				   	
-				   	
-				    
+					//*********************************
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
 				} catch (PartInitException e) {
+					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} catch (JavaModelException e) {
-					e.printStackTrace();
-				} catch (BadLocationException e) {
+					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
@@ -722,130 +751,47 @@ public class LazyTestView extends ViewPart {
 		applyRefactoringAction.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages().
 				getImageDescriptor(ISharedImages.IMG_DEF_VIEW));
 		applyRefactoringAction.setEnabled(false);
-
 	}
-	public String explanationNoEmpty(String path, int line) throws IOException {
-		int inicio = 0, tamanho = 0, contaLinha, caracteres;
+	private String eliminaDuplicaoes(String str, int[] vetorLinhas  ) {
+		String[] conteudoLinhas = str.split("\n");
+		String resultado = "";
 		
-		contaLinha = 1;
-		String conteudoLinha = "";
-		File file  = new File(path);
-		BufferedReader  leitor = new BufferedReader(new FileReader(file));
-		String st;
-		while ((st = leitor.readLine()) != null) {
-			if (contaLinha == line) {
-				conteudoLinha = st; // conteudoLinha é utilizado para remover a explicação vazia
-				break;
-			}
-			contaLinha++;
-		}
-		
-		/*
-		 *  Remove o comentário vazio
-		 */
-		String strFinal = "";
-			
-		int positionPrimeiraAspa = -1;
-		int positionPrimeiroParentese = -1;
-		int positinioVirgula = -1;		
-		char[] ch = conteudoLinha.toCharArray();  		
-		int quant_espacos = 0;		
-		
-		//esse for tira os espaços
-		for(int j = 0; j < ch.length; j++ ){  		
-			if (ch[j] == ' ') {
-				quant_espacos ++;
-			}
-			else {
-				break;
+		for(int i = 0; i < vetorLinhas.length ; i ++ ) {
+			if (vetorLinhas[i] <= 1) {
+				resultado += conteudoLinhas[i] + "\n"; 
 			}
 		}		
-		
-		String aux = "";
-		if (quant_espacos > 0) {
-			aux = conteudoLinha.substring(quant_espacos, conteudoLinha.length());
-			conteudoLinha = aux;
-		}
-		
-		//esse for identifica a posicao de cada aspas
-		char[] vetor = conteudoLinha.toCharArray();   
-		for(int i = 0; i < vetor.length; i++ ){ 	
-			if (vetor[i] == '(' && (positionPrimeiroParentese != -1 ))
-				break;
-			else if (vetor[i] == '(' && (positionPrimeiroParentese == -1 )) 
-				positionPrimeiroParentese = i;
-			else if (vetor[i] == '\"' && (positionPrimeiroParentese != -1) && (positionPrimeiraAspa == -1)) 
-				positionPrimeiraAspa = i;
-			else if (vetor[i] == ',' && positionPrimeiraAspa != -1  ) {
-				positinioVirgula = i;
-				break;
-			}
-		}
-		String resultado = "";
-		if (quant_espacos > 0) {
-			for (int k = 0; k < quant_espacos; k++) {
-				resultado += " ";
-			}
-		}
-		
-		if(positionPrimeiraAspa != -1 && positinioVirgula != -1 ) {
-			resultado += conteudoLinha.substring(0, positionPrimeiraAspa);
-			resultado += conteudoLinha.substring(positinioVirgula + 1, conteudoLinha.length());		
-		}
-		else {
-			resultado += conteudoLinha;
-		}
 		return resultado;
 	}
 	
-	
-	class AssertionParenteseLine {
+	private String createNewMethods(String str, int[] vetorLinhas, String nomeMetodo) {
 		
-		int position;
-		String textBeforeParentese;
+		//Corrigindo nome do m�todo
+		nomeMetodo = nomeMetodo.replace("(", "");
+		nomeMetodo = nomeMetodo.replace(")", "");
+		nomeMetodo = nomeMetodo.replace(" ", "");
+		String nomeNovoMetodo = nomeMetodo + "Extracted";
 		
-		AssertionParenteseLine(int position, String textBeforeParentese) {
-			this.position = position;
-			this.textBeforeParentese = textBeforeParentese;
-		}
+		String aux = "";
+		String resultado = "";
 		
+		String[] conteudoLinhas = str.split("\n");
 		
-	}
-	
-	public AssertionParenteseLine getParentesesPosition(String path, int line) {
-		int contaLinha;
-		
-		contaLinha = 1;
-		
-		File file  = new File(path);
-		BufferedReader leitor;
-		int parentesePosition = -1;
-		String textBeforeParentese = "";
-		try {
-			leitor = new BufferedReader(new FileReader(file));
-			
-			String st;
-			
-			while ((st = leitor.readLine()) != null) {
-				
-				if (contaLinha == line) {
-					parentesePosition = st.indexOf("(");
-					textBeforeParentese = st.substring(0, parentesePosition + 1);
-					break;
+		for(int i = 2; i <= numMaximoDuplicate; i ++) {
+			aux = "";
+			for (int j = 0; j < conteudoLinhas.length; j++) {
+				if (vetorLinhas[j] == 0 || vetorLinhas[j] == i) {
+					aux += conteudoLinhas[j] + "\n"; 
 				}
-				contaLinha++;
-			} 
-		
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		
-		
-		return new AssertionParenteseLine(parentesePosition, textBeforeParentese); 
+			}
+			int extraido = i - 1;
+			aux = aux.replace(nomeMetodo + "()", nomeNovoMetodo + extraido + "()");
+			resultado +=  "\n\t/* Refactored method by RAIDE */\n" + aux + "\n";
+			//resultado += aux + "\n\n";
+		}		
+		//JOptionPane.showConfirmDialog(null, resultado);
+		return resultado;
 	}
-	
 	public Position getPositioAssertion(String path, int line) throws IOException {
 		int inicio = 0, tamanho = 0, contaLinha, caracteres;
 		
@@ -866,6 +812,106 @@ public class LazyTestView extends ViewPart {
 		} 		
 		return new Position(inicio, tamanho);
 		
+	}
+	private List<TestSmellDescription> extraiSmellsMetodo(String nomeMetodo){       
+
+		List<TestSmellDescription> lista = new ArrayList<TestSmellDescription>();
+		nomeMetodo = nomeMetodo.replace(" ", "");
+		for(TestSmellDescription smell : testSmells) {
+			if (smell.getMethodName().equals(nomeMetodo + " \n"))
+				lista.add(smell);
+		}  
+	    return lista;
+    }
+	private static int [] mapeiaAsserDuplicados(int tam, List<TestSmellDescription> lista, int linhaInicial){
+        int teste[] = new int [tam];
+        int diferencaLinha = linhaInicial;
+        
+        //Seta todas as linhas como ZERO
+        for (int i = 0; i < tam; i++){
+            teste[i] = 0;
+        }
+        //Seta a ordem do assert, 1: original, 2: primeira c�pia, etc....
+        
+        for (TestSmellDescription smell: lista){
+        	//int vetorSmellLinha[] = {109, 113};
+        	String aux = smell.getLinePositionBegin().replace(" ", "");
+        	int vetorSmellLinha[] = stringToIntArray(aux);
+        	for (int j = 0; j < vetorSmellLinha.length ; j++) {
+        		teste[vetorSmellLinha[j] - diferencaLinha] = j + 1;
+        	}        	
+        }        
+        return teste;
+    }
+	public static int [] stringToIntArray(String descricaoLinhas) {
+		ArrayList<Integer> arrayInt = new ArrayList();
+		 
+		String[] arrayString = descricaoLinhas.split(",");
+		int tamanhoArrayStr = arrayString.length;
+		
+		if (tamanhoArrayStr > numMaximoDuplicate) {
+			numMaximoDuplicate = tamanhoArrayStr;
+		}
+		
+		int vetor[] = new int [tamanhoArrayStr];
+		for(int i = 0; i < tamanhoArrayStr ; i++){
+		    vetor[i] = Integer.parseInt(arrayString[i]);
+		}
+		 
+		return vetor;
+	}
+	
+	public String copyMethod(String path, int begin, int end) throws IOException {
+		int inicio = 0, tamanho = 0, contaLinha, caracteres;
+		
+		contaLinha = 1;
+		caracteres = 0;
+		
+		File file  = new File(path);
+		BufferedReader  leitor = new BufferedReader(new FileReader(file));
+		String st;
+		String strMethod = "";
+		while ((st = leitor.readLine()) != null) {
+			caracteres += st.length() +1 ;
+			if (contaLinha == begin) {				
+				tamanho = st.length();
+				inicio = (int) (caracteres - tamanho);
+			}
+			if (contaLinha >= begin && contaLinha < end) {
+				strMethod += st + "\n";				
+			}
+			if (contaLinha == end) {				
+				strMethod += st;
+				break;
+			}
+			contaLinha++;
+		} 		
+		//return new Position(inicio, tamanho);
+		return strMethod;
+	}
+	
+	public Position getPositioMethod(String path, int linhaInicial, int linhaFinal) throws IOException {
+		int inicio = 0, tamanho = 0, contaLinha, caracteres;
+		
+		contaLinha = 1;
+		caracteres = 0;
+		
+		File file  = new File(path);
+		BufferedReader leitor = new BufferedReader(new FileReader(file));
+		String st;
+		while ((st = leitor.readLine()) != null) {
+			caracteres += st.length() +1 ;
+			if (contaLinha == linhaInicial) { 		
+				inicio = (int) (caracteres - st.length());				
+			}
+			if (contaLinha >= linhaInicial && contaLinha <= linhaFinal)
+				tamanho += st.length();
+			if (contaLinha == linhaFinal) 
+				break;
+		
+			contaLinha++;
+		} 		
+		return new Position(inicio, tamanho);
 	}
 	public IFile fileToIfile(File file) {
 		 	 
@@ -900,7 +946,7 @@ public class LazyTestView extends ViewPart {
 		if(candidateRefactoringTable != null) {
 			Set<String> entitySet = candidateRefactoring.getEntitySet();
 			for(CandidateRefactoring candidate : candidateRefactoringTable) {
-				if(candidate instanceof AddExplanationCandidateRefactoring) {
+				if(candidate instanceof MethodExtractionCandidateRefactoring) {
 					if(entitySet.contains(candidate.getSourceEntity())/* && candidateRefactoring.getTarget().equals(candidate.getTarget())*/)
 						moveMethodPrerequisiteRefactorings.add(candidate);
 				}
@@ -936,6 +982,7 @@ public class LazyTestView extends ViewPart {
 					}
 				});
 			}
+			//Worker-0: Decoration Calculation
 			SystemObject systemObject = ASTReader.getSystemObject();
 			if(systemObject != null) {
 				Set<ClassObject> classObjectsToBeExamined = new LinkedHashSet<ClassObject>();
@@ -963,14 +1010,14 @@ public class LazyTestView extends ViewPart {
 				MySystem system = new MySystem(systemObject, false);
 				
 				final DistanceMatrix distanceMatrix = new DistanceMatrix(system);
-				final List<AddExplanationCandidateRefactoring> moveMethodCandidateList = new ArrayList<AddExplanationCandidateRefactoring>();
+				final List<MethodExtractionCandidateRefactoring> moveMethodCandidateList = new ArrayList<MethodExtractionCandidateRefactoring>();
 				
 				try {
-					callAssertionRoulette();
+					callDuplicateAssert();
 				} catch (IOException e) {
 					e.printStackTrace();
 				}				
-				AddExplanationCandidateRefactoring addExp;
+				MethodExtractionCandidateRefactoring addExp;
 				int n = testSmells.size();
 				for (int i = 0; i< n; i++) {
 					String superClass = testSmells.get(i).getClass().getSuperclass().getName();
@@ -983,13 +1030,12 @@ public class LazyTestView extends ViewPart {
 					
 					MyClass minhaOutraClasse = new MyClass(testSmells.get(i).getClassName(), testSmells.get(i).getClassName());
 					MyMethod meuMeuMetodo = new MyMethod(testSmells.get(i).getClassName(), testSmells.get(i).getMethodName() + testSmells.get(i).getLinePositionBegin(), "");
-					Position minhaPosicao = new Position(Integer.valueOf(testSmells.get(i).getLinePositionEnd().toString()), 0);
-					addExp = new AddExplanationCandidateRefactoring(system, minhaClasse, minhaOutraClasse, meuMeuMetodo, testSmells.get(i).getLinePositionBegin(), minhaPosicao );
+					addExp = new MethodExtractionCandidateRefactoring(system, minhaClasse, minhaOutraClasse, meuMeuMetodo, testSmells.get(i).getLinePositionBegin(), testSmells.get(i).getBeginMethod(), testSmells.get(i).getEndMethod()  );
 					moveMethodCandidateList.add(addExp);
 				}
 				table = new CandidateRefactoring[moveMethodCandidateList.size()];
 				int counter = 0;
-				for(AddExplanationCandidateRefactoring candidate : moveMethodCandidateList) {
+				for(MethodExtractionCandidateRefactoring candidate : moveMethodCandidateList) {
 					table[counter] = candidate;
 					counter++;
 				}
