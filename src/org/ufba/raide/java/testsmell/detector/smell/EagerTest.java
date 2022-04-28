@@ -195,19 +195,20 @@ public class EagerTest extends AbstractSmell {
                     currentMethod = n;
                     testMethod = new TestMethod(currentMethod.getNameAsString());
                     testMethod.setHasSmell(false); //default value is false (i.e. no smell)
-
+                    String calledMethodsName = "";
                     super.visit(n, arg);
                     if(calledMethods.size()> 1){
                         ArrayList<String> resultado = new ArrayList<>();
                         for(Map.Entry entry:calledMethods.entrySet()){
                             resultado.addAll((Collection<? extends String>) entry.getValue());
+                            calledMethodsName += entry.getKey().toString() + " - "; 
                         }
                         List<String> deduped = resultado.stream().distinct().collect(Collectors.toList());
                         Collections.sort(deduped);
                         instanceEager.add(new MethodUsage(currentMethod.getNameAsString(),
                                 "",deduped.toString()
                                 .replace("[","").replace("]","")));
-                        insertTestSmell(n.getRange().get(), n);
+                        insertTestSmell(n.getRange().get(), n, calledMethodsName);
                     }
 
                     //reset values for next method
@@ -354,7 +355,7 @@ public class EagerTest extends AbstractSmell {
             super.visit(n, arg);
         }
     }
-	public void insertTestSmell (Range range, MethodDeclaration testMethod) {
+	public void insertTestSmell (Range range, MethodDeclaration testMethod, String calledMethodsName) {
 		cadaTestSmell = new TestSmellDescription("Ignored Test", 
 												 "....", 
 				 								 getFilePath(), 
@@ -370,7 +371,8 @@ public class EagerTest extends AbstractSmell {
 		smellLocation = "Classe " + getClassName() + "\n" + 
 						"Método " + testMethod.getName() + "() \n" + 
 						"Begin " + range.begin.line + "\n" +
-						"End " + range.end.line;
+						"End " + range.end.line + "\n" +
+						calledMethodsName;
 		System.out.println(smellLocation);
 	}
 	
