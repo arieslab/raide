@@ -367,13 +367,13 @@ public class EagerTest extends AbstractSmell {
 				 								 range.end.line,
 												 "");	
 		listTestSmells.add(cadaTestSmell);
-		String smellLocation;
-		smellLocation = "Classe " + getClassName() + "\n" + 
-						"Método " + testMethod.getName() + "() \n" + 
-						"Begin " + range.begin.line + "\n" +
-						"End " + range.end.line + "\n" +
-						calledMethodsName;
-		System.out.println(smellLocation);
+//		String smellLocation;
+//		smellLocation = "Classe " + getClassName() + "\n" + 
+//						"Método " + testMethod.getName() + "() \n" + 
+//						"Begin " + range.begin.line + "\n" +
+//						"End " + range.end.line + "\n" +
+//						calledMethodsName;
+//		System.out.println(smellLocation);
 	}
 	
 	public String getClassName() {

@@ -2,27 +2,70 @@
 <?eclipse version="3.2"?>
 <plugin>
 
-   <extension
+	<extension
          point="org.eclipse.ui.actionSets">
-      <actionSet
+		<actionSet
             label="TestSmells"
             visible="true"
             id="org.ufba.raide.TestSmells">
-         <menu
+			<menu
                id="BadSmellsMenu"
                label="RAIDE">
-         </menu>
+         	</menu>
+         
+		 	<action
+			   class="org.ufba.raide.java.actions.TestSmellsMenu"
+			   icon="icons/ladybird.png"
+			   id="org.ufba.raide.java.actions.RedundantAssertion"
+			   label="Redundant Assertion"
+			   menubarPath="BadSmellsMenu/sampleGroup"
+			   tooltip="Redundant Assertion">
+			 
+			</action>         
+			<action
+			   class="org.ufba.raide.java.actions.TestSmellsMenu"
+			   icon="icons/ladybird.png"
+			   id="org.ufba.raide.java.actions.PrintStatement"
+			   label="Print Statement"
+			   menubarPath="BadSmellsMenu/sampleGroup"
+			   tooltip="Print Statement">
+			</action>
+			   <action
+			   class="org.ufba.raide.java.actions.TestSmellsMenu"
+			   icon="icons/ladybird.png"
+			   id="org.ufba.raide.java.actions.MysteryGuest"
+			   label="Mystery Guest"
+			   menubarPath="BadSmellsMenu/sampleGroup"
+			   tooltip="Mystery Guest">
+			</action>         
+			<action
+			   class="org.ufba.raide.java.actions.TestSmellsMenu"
+			   icon="icons/ladybird.png"
+			   id="org.ufba.raide.java.actions.MagicNumberTest"
+			   label="Magic Number Test"
+			   menubarPath="BadSmellsMenu/sampleGroup"
+			   tooltip="Magic Number Test">
+			</action>
          
          <action
                class="org.ufba.raide.java.actions.TestSmellsMenu"
                icon="icons/ladybird.png"
-               id="org.ufba.raide.java.actions.IgnoredTest"
-               label="Ignored Test"
+               id="org.ufba.raide.java.actions.LazyTest"
+               label="Lazy Test"
                menubarPath="BadSmellsMenu/sampleGroup"
-               tooltip="Ignored Test">
+               tooltip="Lazy Test">
          </action>
          
-         <action
+			------
+		<action
+		   class="org.ufba.raide.java.actions.TestSmellsMenu"
+		   icon="icons/ladybird.png"
+		   id="org.ufba.raide.java.actions.IgnoredTest"
+		   label="Ignored Test"
+		   menubarPath="BadSmellsMenu/sampleGroup"
+		   tooltip="Ignored Test">
+		</action>   
+        <action
                class="org.ufba.raide.java.actions.TestSmellsMenu"
                icon="icons/ladybird.png"
                id="org.ufba.raide.java.actions.GeneralFixture"
@@ -187,6 +230,46 @@
             icon="icons/ladybird.png"
             id="org.ufba.raide.java.views.IgnoredTest"
             name="Ignored Test">
+      </view>
+      <view
+            category="org.ufba.raide"
+            class="org.ufba.raide.java.refactoring.views.LazyTestView"
+            icon="icons/ladybird.png"
+            id="org.ufba.raide.java.views.LazyTest"
+            name="Lazy Test"
+            restorable="true">
+      </view>
+      <view
+            category="org.ufba.raide"
+            class="org.ufba.raide.java.refactoring.views.MagicNumberTestView"
+            icon="icons/ladybird.png"
+            id="org.ufba.raide.java.views.MagicNumberTest"
+            name="Magic Number Test"
+            restorable="true">
+      </view>
+      <view
+            category="org.ufba.raide"
+            class="org.ufba.raide.java.refactoring.views.MysteryGuestView"
+            icon="icons/ladybird.png"
+            id="org.ufba.raide.java.views.MysteryGuest"
+            name="Mystery Guest"
+            restorable="true">
+      </view>
+      <view
+            category="org.ufba.raide"
+            class="org.ufba.raide.java.refactoring.views.PrintStatementView"
+            icon="icons/ladybird.png"
+            id="org.ufba.raide.java.views.PrintStatement"
+            name="Print Statement"
+            restorable="true">
+      </view>
+      <view
+            category="org.ufba.raide"
+            class="org.ufba.raide.java.refactoring.views.RedundantAssertionView"
+            icon="icons/ladybird.png"
+            id="org.ufba.raide.java.views.RedundantAssertion"
+            name="Redundant Assertion"
+            restorable="true">
       </view>
    </extension>
    <extension
