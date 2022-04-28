@@ -12,6 +12,7 @@ import org.ufba.raide.java.refactoring.views.EmptyTestView;
 import org.ufba.raide.java.refactoring.views.ExceptionCatchingThrowingView;
 import org.ufba.raide.java.refactoring.views.GeneralFixtureView;
 import org.ufba.raide.java.refactoring.views.IgnoredTestView;
+import org.ufba.raide.java.refactoring.views.LazyTestView;
 import org.ufba.raide.java.refactoring.views.ConditionalTestLogicView;
 import org.ufba.raide.java.refactoring.views.ConstructionInstallationView;
 import org.ufba.raide.java.refactoring.views.DefaultTestView;
@@ -90,6 +91,10 @@ public class TestSmellDetector {
         } 
         else if (tipoTestSmell.equals(IgnoredTestView.getMessageDialogTitle())) {
         	testSmells.add(new IgnoredTest(getNameClass(), getFilePathClass()));        	
+        } 
+        //
+        else if (tipoTestSmell.equals(LazyTestView.getMessageDialogTitle())) {
+        	testSmells.add(new LazyTest(getNameClass(), getFilePathClass()));        	
         } 
     }
 
