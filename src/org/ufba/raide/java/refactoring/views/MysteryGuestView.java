@@ -140,7 +140,7 @@ import org.eclipse.ltk.ui.refactoring.RefactoringWizardOpenOperation;
 
 public class MysteryGuestView extends ViewPart {
 	
-	private static final String MESSAGE_DIALOG_TITLE = "Conditional Test Logic";
+	private static final String MESSAGE_DIALOG_TITLE = "Mystery Guest";
 	private TableViewer tableViewer;
 	private TreeViewer treeViewer;
 	private Action identifyBadSmellsAction;
@@ -209,7 +209,7 @@ public class MysteryGuestView extends ViewPart {
 			switch(index){
 				case 0:
 					if(entry instanceof AddExplanationCandidateRefactoring)
-						return "Conditional Test Logic";
+						return "Mystery Guest";
 					else
 						return "";
 				case 1:

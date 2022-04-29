@@ -38,7 +38,7 @@ import org.ufba.raide.java.testsmell.Util;
  */
 
 
-public class MagicNumberTest extends AbstractSmell {
+public class MysteryGuest extends AbstractSmell {
 	
 	ArrayList<TestSmellDescription> listTestSmells;
 	TestSmellDescription cadaTestSmell;	
@@ -57,7 +57,7 @@ public class MagicNumberTest extends AbstractSmell {
 		this.filePath = filePath;
 	}	
 
-	public MagicNumberTest(String name, String path) {
+	public MysteryGuest(String name, String path) {
 		setClassName(name);
 		setFilePath(path);
 		smellyElementList = new ArrayList<>();
@@ -65,7 +65,7 @@ public class MagicNumberTest extends AbstractSmell {
 	}
 	@Override
 	public String getSmellName() {
-		return "Magic Number Test";
+		return "Mystery Guest";
 	}
 
 	/**
@@ -96,8 +96,8 @@ public class MagicNumberTest extends AbstractSmell {
 		
 		listTestSmells = new ArrayList<TestSmellDescription>();
 		instances = new ArrayList<>();
-		MagicNumberTest.ClassVisitor classVisitor;
-		classVisitor = new MagicNumberTest.ClassVisitor();
+		MysteryGuest.ClassVisitor classVisitor;
+		classVisitor = new MysteryGuest.ClassVisitor();
 		classVisitor.visit(testFileCompilationUnit, null);
 		
 		for (MethodUsage method : instances) {
