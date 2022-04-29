@@ -140,7 +140,7 @@ import org.eclipse.ltk.ui.refactoring.RefactoringWizardOpenOperation;
 
 public class SensitiveEqualityView extends ViewPart {
 	
-	private static final String MESSAGE_DIALOG_TITLE = "Conditional Test Logic";
+	private static final String MESSAGE_DIALOG_TITLE = "Sensitive Equality";
 	private TableViewer tableViewer;
 	private TreeViewer treeViewer;
 	private Action identifyBadSmellsAction;
@@ -154,7 +154,7 @@ public class SensitiveEqualityView extends ViewPart {
 	private IType selectedType;
 	private CandidateRefactoring[] candidateRefactoringTable;
 	private IJavaProject project;
-	final String REFACTORING_DESCRIPTION = "Add Assertion Explanation";
+	final String REFACTORING_DESCRIPTION = "R...";
 
 
     private List<TestSmellDescription> testSmells;
@@ -209,7 +209,7 @@ public class SensitiveEqualityView extends ViewPart {
 			switch(index){
 				case 0:
 					if(entry instanceof AddExplanationCandidateRefactoring)
-						return "Conditional Test Logic";
+						return "Sensitive Equality";
 					else
 						return "";
 				case 1:

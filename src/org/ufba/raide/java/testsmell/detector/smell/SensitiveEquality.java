@@ -48,7 +48,7 @@ public class SensitiveEquality extends AbstractSmell {
 	ArrayList<TestSmellDescription> listTestSmells;
 	TestSmellDescription cadaTestSmell;	
 	private List<SmellyElement> smellyElementList;
-	private ArrayList<MethodUsage> mysteryInstance;
+	private ArrayList<MethodUsage> methodSensitiveEquality;
 	
 	String className;
 	String filePath;
@@ -98,9 +98,11 @@ public class SensitiveEquality extends AbstractSmell {
 												  CompilationUnit productionFileCompilationUnit,
 												  String testFileName, 
 												  String productionFileName) throws FileNotFoundException {
-		methodPrints = new ArrayList<>();
 		listTestSmells = new ArrayList<TestSmellDescription>();
 		instances = new ArrayList<>();
+		methodSensitiveEquality = new ArrayList<MethodUsage>();
+		
+		
 		SensitiveEquality.ClassVisitor classVisitor;
 		classVisitor = new SensitiveEquality.ClassVisitor();
 		classVisitor.visit(testFileCompilationUnit, null);
@@ -130,10 +132,9 @@ public class SensitiveEquality extends AbstractSmell {
 	private class ClassVisitor extends VoidVisitorAdapter<Void> {
 		
 		private MethodDeclaration currentMethod = null;
-	    int countPrint = 0;
+		private int sensitiveCount = 0;
 
-     // examine all methods in the test class
-        @Override
+		@Override
         public void visit(MethodDeclaration n, Void arg) {
             if (Util.isValidTestMethod(n)) {
                 currentMethod = n;
@@ -141,31 +142,35 @@ public class SensitiveEquality extends AbstractSmell {
 
                 //reset values for next method
                 currentMethod = null;
-                countPrint = 0;
+                sensitiveCount = 0;
             }
         }
-     // examine the methods being called within the test method
+
+        // examine the methods being called within the test method
         @Override
         public void visit(MethodCallExpr n, Void arg) {
             super.visit(n, arg);
             if (currentMethod != null) {
-                // if the name of a method being called is 'print' or 'println' or 'printf' or 'write'
-                if (n.getNameAsString().equals("print") || n.getNameAsString().equals("println") || n.getNameAsString().equals("printf") || n.getNameAsString().equals("write")) {
-                    //check the scope of the method & proceed only if the scope is "out"
-                    if ((n.getScope().isPresent() &&
-                            n.getScope().get() instanceof FieldAccessExpr &&
-                            (((FieldAccessExpr) n.getScope().get())).getNameAsString().equals("out"))) {
-
-                        FieldAccessExpr f1 = (((FieldAccessExpr) n.getScope().get()));
-
-                        //check the scope of the field & proceed only if the scope is "System"
-                        if ((f1.getScope() != null &&
-                                f1.getScope() instanceof NameExpr &&
-                                ((NameExpr) f1.getScope()).getNameAsString().equals("System"))) {
-                            //a print statement exists in the method body
-                            countPrint++;
-                            methodPrints.add(new MethodUsage(currentMethod.getNameAsString(), "",n.getRange().get().begin.line+""));
-                            insertTestSmell(n.getRange().get(), this.currentMethod);
+                // if the name of a method being called start with 'assert'
+                if (n.getNameAsString().startsWith(("assert"))) {
+                    // assert methods that contain toString
+                    for (Expression argument : n.getArguments()) {
+                        if (argument.toString().contains("toString")) {
+                            sensitiveCount++;
+                            methodSensitiveEquality.add(new MethodUsage(currentMethod.getNameAsString(), "",n.getRange().get().begin.line + "-" + n.getRange().get().end.line));
+                            insertTestSmell(n.getRange().get(), currentMethod);
+                        }
+                    }
+                }
+                // if the name of a method being called is 'fail' \/ added validation to jUnit3 fail cases
+                else if (n.getNameAsString().equals("fail") || n.getNameAsString().equals("failNotEquals") ||
+                		 n.getNameAsString().equals("failSame") || n.getNameAsString().equals("failNotSame"))  {
+                    // fail methods that contain toString
+                    for (Expression argument : n.getArguments()) {
+                        if (argument.toString().contains("toString")) {
+                            sensitiveCount++;
+                            methodSensitiveEquality.add(new MethodUsage(currentMethod.getNameAsString(), "",n.getRange().get().begin.line + "-" + n.getRange().get().end.line));
+                            insertTestSmell(n.getRange().get(), currentMethod);
                         }
                     }
                 }
