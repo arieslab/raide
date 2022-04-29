@@ -48,11 +48,10 @@ public class SleepyTest extends AbstractSmell {
 	ArrayList<TestSmellDescription> listTestSmells;
 	TestSmellDescription cadaTestSmell;	
 	private List<SmellyElement> smellyElementList;
-	private ArrayList<MethodUsage> mysteryInstance;
+	private ArrayList<MethodUsage> spleepyInstance;
 	
 	String className;
 	String filePath;
-	private ArrayList<MethodUsage> instances;
 	private List<MethodUsage> methodPrints;
 	
 	public String getFilePath() {
@@ -98,15 +97,15 @@ public class SleepyTest extends AbstractSmell {
 												  CompilationUnit productionFileCompilationUnit,
 												  String testFileName, 
 												  String productionFileName) throws FileNotFoundException {
+		spleepyInstance = new ArrayList<>();
 		methodPrints = new ArrayList<>();
 		listTestSmells = new ArrayList<TestSmellDescription>();
-		instances = new ArrayList<>();
 		SleepyTest.ClassVisitor classVisitor;
 		classVisitor = new SleepyTest.ClassVisitor();
 		classVisitor.visit(testFileCompilationUnit, null);
 		
 		
-		for (MethodUsage method : instances) {
+		for (MethodUsage method : spleepyInstance) {
             TestMethod testClass = new TestMethod(method.getTestMethodName());
             testClass.setRange(method.getRange());
 //            testClass.addDataItem("begin", method.getLine());
@@ -141,7 +140,6 @@ public class SleepyTest extends AbstractSmell {
 
                 //reset values for next method
                 currentMethod = null;
-                countPrint = 0;
             }
         }
      // examine the methods being called within the test method
@@ -149,23 +147,14 @@ public class SleepyTest extends AbstractSmell {
         public void visit(MethodCallExpr n, Void arg) {
             super.visit(n, arg);
             if (currentMethod != null) {
-                // if the name of a method being called is 'print' or 'println' or 'printf' or 'write'
-                if (n.getNameAsString().equals("print") || n.getNameAsString().equals("println") || n.getNameAsString().equals("printf") || n.getNameAsString().equals("write")) {
-                    //check the scope of the method & proceed only if the scope is "out"
-                    if ((n.getScope().isPresent() &&
-                            n.getScope().get() instanceof FieldAccessExpr &&
-                            (((FieldAccessExpr) n.getScope().get())).getNameAsString().equals("out"))) {
-
-                        FieldAccessExpr f1 = (((FieldAccessExpr) n.getScope().get()));
-
-                        //check the scope of the field & proceed only if the scope is "System"
-                        if ((f1.getScope() != null &&
-                                f1.getScope() instanceof NameExpr &&
-                                ((NameExpr) f1.getScope()).getNameAsString().equals("System"))) {
-                            //a print statement exists in the method body
-                            countPrint++;
-                            methodPrints.add(new MethodUsage(currentMethod.getNameAsString(), "",n.getRange().get().begin.line+""));
-                            insertTestSmell(n.getRange().get(), this.currentMethod);
+                // if the name of a method being called is 'sleep'
+                if (n.getNameAsString().equals("sleep")) {
+                    //check the scope of the method
+                    if ((n.getScope().isPresent() && n.getScope().get() instanceof NameExpr)) {
+                        //proceed only if the scope is "Thread"
+                        if ((((NameExpr) n.getScope().get()).getNameAsString().equals("Thread"))) {
+                            spleepyInstance.add(new MethodUsage(currentMethod.getNameAsString(), "", n.getRange().get().begin.line + "-" + n.getRange().get().end.line));
+                            insertTestSmell(n.getRange().get(), currentMethod);
                         }
                     }
                 }

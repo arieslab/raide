@@ -140,7 +140,7 @@ import org.eclipse.ltk.ui.refactoring.RefactoringWizardOpenOperation;
 
 public class SleepyTestView extends ViewPart {
 	
-	private static final String MESSAGE_DIALOG_TITLE = "Conditional Test Logic";
+	private static final String MESSAGE_DIALOG_TITLE = "Sleepy Test";
 	private TableViewer tableViewer;
 	private TreeViewer treeViewer;
 	private Action identifyBadSmellsAction;
@@ -154,7 +154,7 @@ public class SleepyTestView extends ViewPart {
 	private IType selectedType;
 	private CandidateRefactoring[] candidateRefactoringTable;
 	private IJavaProject project;
-	final String REFACTORING_DESCRIPTION = "Add Assertion Explanation";
+	final String REFACTORING_DESCRIPTION = "Refactoring";
 
 
     private List<TestSmellDescription> testSmells;
@@ -209,7 +209,7 @@ public class SleepyTestView extends ViewPart {
 			switch(index){
 				case 0:
 					if(entry instanceof AddExplanationCandidateRefactoring)
-						return "Conditional Test Logic";
+						return "Sleepy Test";
 					else
 						return "";
 				case 1:
@@ -570,7 +570,7 @@ public class SleepyTestView extends ViewPart {
 				if(wasAlreadyOpen)
 					openPackageExplorerViewPart();
 				if (candidateRefactoringTable == null || candidateRefactoringTable.length == 0 ) {
-					JOptionPane.showMessageDialog(null, "Conditional Test Logic not found.");				
+					JOptionPane.showMessageDialog(null, "Sleepy Test not found.");				
 				}
 			}
 		};
