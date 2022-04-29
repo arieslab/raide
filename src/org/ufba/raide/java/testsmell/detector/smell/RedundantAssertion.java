@@ -1,8 +1,11 @@
 package org.ufba.raide.java.testsmell.detector.smell;
 
+import com.github.javaparser.Range;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.expr.BooleanLiteralExpr;
 import com.github.javaparser.ast.expr.MethodCallExpr;
+import com.github.javaparser.ast.expr.NullLiteralExpr;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 
 import java.io.FileNotFoundException;
@@ -31,6 +34,7 @@ public class RedundantAssertion extends AbstractSmell {
 	ArrayList<TestSmellDescription> listTestSmells;
 	TestSmellDescription cadaTestSmell;	
 	private List<SmellyElement> smellyElementList;
+	ArrayList<MethodUsage> methodPrints = null;
 	
 	String className;
 	String filePath;
@@ -86,7 +90,7 @@ public class RedundantAssertion extends AbstractSmell {
 												  String productionFileName) throws FileNotFoundException {
 		
 		listTestSmells = new ArrayList<TestSmellDescription>();
-		
+		methodPrints = new ArrayList<MethodUsage>();
 		RedundantAssertion.ClassVisitor classVisitor;
 		classVisitor = new RedundantAssertion.ClassVisitor();
 		classVisitor.visit(testFileCompilationUnit, null);
@@ -105,9 +109,8 @@ public class RedundantAssertion extends AbstractSmell {
 
 	private class ClassVisitor extends VoidVisitorAdapter<Void> {
 		private MethodDeclaration currentMethod = null;
-		private int assertNoMessageCount = 0;
-		private int assertCount = 0;
 		TestMethod testMethod;
+		private int redundantCount = 0;
 
 		// examine all methods in the test class
 		@Override
@@ -118,114 +121,92 @@ public class RedundantAssertion extends AbstractSmell {
 				testMethod = new TestMethod(n.getNameAsString());
 				testMethod.setHasSmell(false); // default value is false (i.e. no smell)
 				super.visit(n, arg);
-
-				// if there is only 1 assert statement in the method, then a explanation message
-				// is not needed
-				if (assertCount == 1)
-					testMethod.setHasSmell(false);
-				else if (assertNoMessageCount >= 1) // if there is more than one assert statement, then all the asserts
-													// need to have an explanation message
-					testMethod.setHasSmell(true);
-
-				testMethod.addDataItem("AssertCount", String.valueOf(assertNoMessageCount));
-
 				smellyElementList.add(testMethod);
 
 				// reset values for next method
 				currentMethod = null;
-				assertCount = 0;
-				assertNoMessageCount = 0;
+				redundantCount = 0;
 			}
 		}
 		
-		public boolean explanationIsEmpty(String str) {
-			boolean resultado = false;
-			
-			char[] ch = str.toCharArray();   
-			String strFinal = "";
-			
-			//Remove todos os espa�os 
-			for(int i = 0; i < ch.length; i++ ){    
-				if (ch[i] != ' ') {
-					strFinal += ch[i]; 
-				}	
-			}
-			if (strFinal.equals("\"\""))
-				resultado = true;			
-			
-			return resultado;
-			
-		}
-		
-
-		// examine the methods being called within the test method
 		@Override
-		public void visit(MethodCallExpr n, Void arg) {
-			
-			boolean flag = false;
-			super.visit(n, arg);
-			if (currentMethod != null) {
-				// if the name of a method being called is an assertion and has 3 parameters
-				if (n.getNameAsString().startsWith(("assertArrayEquals"))
-						|| n.getNameAsString().startsWith(("assertEquals"))
-						|| n.getNameAsString().startsWith(("assertNotSame"))
-						|| n.getNameAsString().startsWith(("assertSame"))
-						|| n.getNameAsString().startsWith(("assertThat"))) {
-					assertCount++;
-					// assert methods that do not contain a message
+        public void visit(MethodCallExpr n, Void arg) {
+            String argumentValue = null;
 
-					if (n.getArguments().size() < 3 || (explanationIsEmpty(n.getArgument(0).toString()))) {
-						assertNoMessageCount++;
-						flag = true;
-					}
-				}
-				// if the name of a method being called is an assertion and has 2 parameters
-				else if (n.getNameAsString().equals("assertFalse") || n.getNameAsString().equals("assertNotNull")
-						|| n.getNameAsString().equals("assertNull") || n.getNameAsString().equals("assertTrue")) {
-					assertCount++;
-					
-					// assert methods that do not contain a message
-					if ((n.getArguments().size() < 2) || (explanationIsEmpty(n.getArgument(0).toString())) ) {
-						assertNoMessageCount++;
-						flag = true;
-					}
-				}
-				//workspace
-				// if the name of a method being called is 'fail'
-				else if (n.getNameAsString().equals("fail")) {
-					assertCount++;
-					// fail method does not contain a message
-					if (n.getArguments().size() < 1 || (explanationIsEmpty(n.getArgument(0).toString()))) {
-						assertNoMessageCount++;
-						flag = true;
-					}
-				}
-				if (flag) {
-					// JOptionPane.showMessageDialog(null, "O método " +
-					// this.testMethod.getElementName() + "() apresenta smell");
-					
-					cadaTestSmell = new TestSmellDescription("Assertion Roulette", 
-															 "Assertion Explanation", 
-															 getFilePath(), getClassName(),
-															 this.testMethod.getElementName() + "() \n" , 
-															 n.getRange().get().begin.line + "", 
-															 n.getRange().get().begin.line + "", 
-															 n.getRange().get().begin.line, 
-															 n.getRange().get().end.line,
-															 "");	
-					listTestSmells.add(cadaTestSmell);
-					String smellLocation;
-					smellLocation = "Classe " + getClassName() + "\n" +
-							        "Método " + this.testMethod.getElementName() + "() \n" +
-							        "Linha " + n.getRange().get().begin.line;
-					//JOptionPane.showMessageDialog(null, smellLocation);
-					
+            super.visit(n, arg);
+            if (currentMethod != null) {
+                switch (n.getNameAsString()) {
+                    case "assertTrue":
+                    case "assertFalse":
+                        if (n.getArguments().size() == 1 && n.getArgument(0) instanceof BooleanLiteralExpr) { // assertTrue(boolean condition) or assertFalse(boolean condition)
+                            argumentValue = Boolean.toString(((BooleanLiteralExpr) n.getArgument(0)).getValue());
+                        } else if (n.getArguments().size() == 2 && n.getArgument(1) instanceof BooleanLiteralExpr) { // assertTrue(java.lang.String message, boolean condition)  or assertFalse(java.lang.String message, boolean condition)
+                            argumentValue = Boolean.toString(((BooleanLiteralExpr) n.getArgument(1)).getValue());
+                        }
 
-				}
+                        if (argumentValue != null && (argumentValue.toLowerCase().equals("true") || argumentValue.toLowerCase().equals("false"))) {
+                            redundantCount++;
+                            methodPrints.add(new MethodUsage(currentMethod.getNameAsString(), "",n.getRange().get().begin.line + "-" + n.getRange().get().end.line));
+                            insertTestSmell(n.getRange().get(), this.currentMethod);
+                        }
+                    break;
 
-			}
-		}
+                    case "assertNotNull":
+                    case "assertNull":
+                        if (n.getArguments().size() == 1 && n.getArgument(0) instanceof NullLiteralExpr) { // assertNotNull(java.lang.Object object) or assertNull(java.lang.Object object)
+                            argumentValue = (((NullLiteralExpr) n.getArgument(0)).toString());
+                        } else if (n.getArguments().size() == 2 && n.getArgument(1) instanceof NullLiteralExpr) { // assertNotNull(java.lang.String message, java.lang.Object object) or assertNull(java.lang.String message, java.lang.Object object)
+                            argumentValue = (((NullLiteralExpr) n.getArgument(1)).toString());
+                        }
 
+                        if (argumentValue != null && (argumentValue.toLowerCase().equals("null"))) {
+                            redundantCount++;
+                            methodPrints.add(new MethodUsage(currentMethod.getNameAsString(), "",n.getRange().get().begin.line + "-" + n.getRange().get().end.line));
+                            insertTestSmell(n.getRange().get(), this.currentMethod);
+                        }
+                    break;
+
+                    default:
+                        if (n.getNameAsString().startsWith("assert")) {
+                            if (n.getArguments().size() == 2) { //e.g. assertArrayEquals(byte[] expecteds, byte[] actuals); assertEquals(long expected, long actual);
+                                if (n.getArgument(0).equals(n.getArgument(1))) {
+                                    redundantCount++;
+                                    methodPrints.add(new MethodUsage(currentMethod.getNameAsString(), "",n.getRange().get().begin.line + "-" + n.getRange().get().end.line));
+                                    insertTestSmell(n.getRange().get(), this.currentMethod);
+                                }
+                            }
+                            if (n.getArguments().size() == 3) { //e.g. assertArrayEquals(java.lang.String message, byte[] expecteds, byte[] actuals); assertEquals(java.lang.String message, long expected, long actual)
+                                if (n.getArgument(1).equals(n.getArgument(2))) {
+                                    redundantCount++;
+                                    methodPrints.add(new MethodUsage(currentMethod.getNameAsString(), "",n.getRange().get().begin.line + "-" + n.getRange().get().end.line));
+                                    insertTestSmell(n.getRange().get(), this.currentMethod);
+                                }
+                            }
+                        }
+                    break;
+                }
+            }
+        }
+	}
+	public void insertTestSmell (Range range, MethodDeclaration testMethod) {
+		cadaTestSmell = new TestSmellDescription("Ignored Test", 
+				 "....", 
+				 getFilePath(), 
+				 getClassName(),
+				 testMethod.getName() + "() \n" ,
+				 range.begin.line + "", 
+				 range.end.line + "", 
+				 range.begin.line, 
+				 range.end.line,
+				 "");	
+		listTestSmells.add(cadaTestSmell);
+		
+		String smellLocation;
+		smellLocation = "Classe " + getClassName() + "\n" + 
+		"M�todo " + testMethod.getName() + "() \n" + 
+		"Begin " + range.begin.line + "\n" +
+		"End " + range.end.line;
+		System.out.println(smellLocation);
 	}
 	public String getClassName() {
 		return className;
