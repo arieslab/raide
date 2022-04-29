@@ -154,7 +154,7 @@ public class RedundantAssertionView extends ViewPart {
 	private IType selectedType;
 	private CandidateRefactoring[] candidateRefactoringTable;
 	private IJavaProject project;
-	final String REFACTORING_DESCRIPTION = "Add Assertion Explanation";
+	final String REFACTORING_DESCRIPTION = "Refactoring ...";
 
 
     private List<TestSmellDescription> testSmells;
@@ -209,7 +209,7 @@ public class RedundantAssertionView extends ViewPart {
 			switch(index){
 				case 0:
 					if(entry instanceof AddExplanationCandidateRefactoring)
-						return "Assertion Roulette";
+						return "Redundant Assertion";
 					else
 						return "";
 				case 1:
