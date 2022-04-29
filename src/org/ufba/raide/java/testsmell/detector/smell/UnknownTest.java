@@ -3,9 +3,12 @@ package org.ufba.raide.java.testsmell.detector.smell;
 import com.github.javaparser.Range;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Modifier;
+import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.ConditionalExpr;
+import com.github.javaparser.ast.expr.MemberValuePair;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.stmt.DoStmt;
 import com.github.javaparser.ast.stmt.ForStmt;
@@ -19,6 +22,7 @@ import java.awt.Container;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import javax.swing.JOptionPane;
 
@@ -36,7 +40,7 @@ public class UnknownTest extends AbstractSmell {
 	ArrayList<TestSmellDescription> listTestSmells;
 	TestSmellDescription cadaTestSmell;	
 	private List<SmellyElement> smellyElementList;
-	private List<MethodUsage> methodConditional;
+	private List<MethodUsage> instanceUnkNown;
 	
 	String className;
 	String filePath;
@@ -62,7 +66,7 @@ public class UnknownTest extends AbstractSmell {
 		setClassName(name);
 		setFilePath(path);
 		smellyElementList = new ArrayList<>();
-		methodConditional = new ArrayList<>();
+		instanceUnkNown = new ArrayList<>();
 	}
 
 	/**
@@ -92,7 +96,7 @@ public class UnknownTest extends AbstractSmell {
 												  String productionFileName) throws FileNotFoundException {
 		
 		listTestSmells = new ArrayList<TestSmellDescription>();
-		
+		instanceUnkNown = new ArrayList<> ();
 		UnknownTest.ClassVisitor classVisitor;
 		classVisitor = new UnknownTest.ClassVisitor();
 		classVisitor.visit(testFileCompilationUnit, null);
@@ -110,39 +114,57 @@ public class UnknownTest extends AbstractSmell {
 	}
 
 	private class ClassVisitor extends VoidVisitorAdapter<Void> {
-		TestClass testClass;
+		private MethodDeclaration currentMethod = null;
+        List<String> assertMessage = new ArrayList<>();
+        boolean hasAssert = false;
+        boolean hasExceptionAnnotation = false;
 		
+     // examine all methods in the test class
         @Override
         public void visit(MethodDeclaration n, Void arg) {
-
-            //JUnit 4
-            //check if test method has Ignore annotation
-            if (n.getAnnotationByName("Test").isPresent()) {
-                if (n.getAnnotationByName("Ignore").isPresent() || flag) {
-//                    instanceIgnored.add(new MethodUsage(n.getNameAsString(), "",n.getRange().get().begin.line + "-" + n.getRange().get().end.line));
-                    insertTestSmell(n.getRange().get(), n);
-                    return;
+            if (Util.isValidTestMethod(n) && n.getBody().get().getStatements().size() >0) {
+                Optional<AnnotationExpr> assertAnnotation = n.getAnnotationByName("Test");
+                if (assertAnnotation.isPresent()) {
+                    for (int i = 0; i < assertAnnotation.get().getNodeLists().size(); i++) {
+                        NodeList<?> c = assertAnnotation.get().getNodeLists().get(i);
+                        for (int j = 0; j < c.size(); j++)
+                            if (c.get(j) instanceof MemberValuePair) {
+                                if (((MemberValuePair) c.get(j)).getName().equals("expected") && ((MemberValuePair) c.get(j)).getValue().toString().contains("Exception"));
+                                hasExceptionAnnotation = true;
+                            }
+                    }
                 }
-            }
+                currentMethod = n;
+                super.visit(n, arg);
 
-            //JUnit 3
-            //check if test method is not public
-            if (n.getNameAsString().toLowerCase().startsWith("test")) {
-                if (!n.getModifiers().contains(Modifier.PUBLIC)) {
-//                    instanceIgnored.add(new MethodUsage(n.getNameAsString(), "",n.getRange().get().begin.line + "-" + n.getRange().get().end.line));
-                    insertTestSmell(n.getRange().get(), n);
-                    return;
+                // if there are duplicate messages, then the smell exists
+                if (!hasAssert && !hasExceptionAnnotation) {
+                    instanceUnkNown.add(new MethodUsage(n.getNameAsString(), "",n.getRange().get().begin.line + "-" + n.getRange().get().end.line));
+                    insertTestSmell(n.getRange().get(), this.currentMethod);
                 }
+                //reset values for next method
+                currentMethod = null;
+                assertMessage = new ArrayList<>();
+                hasAssert = false;
             }
         }
-        
+
+
+        // examine the methods being called within the test method
         @Override
-        public void visit(ClassOrInterfaceDeclaration n, Void arg) {
-            if (n.getAnnotationByName("Ignore").isPresent()) {
-                testClass = new TestClass(n.getNameAsString());
-                flag = true;
-            }
+        public void visit(MethodCallExpr n, Void arg) {
             super.visit(n, arg);
+            if (currentMethod != null) {
+                // if the name of a method being called start with 'assert'
+                if (n.getNameAsString().startsWith(("assert"))) {
+                    hasAssert = true;
+                }
+                // if the name of a method being called is 'fail'
+                else if (n.getNameAsString().equals("fail")) {
+                    hasAssert = true;
+                }
+
+            }
         }
 	}
 	public void insertTestSmell (Range range, MethodDeclaration testMethod) {
