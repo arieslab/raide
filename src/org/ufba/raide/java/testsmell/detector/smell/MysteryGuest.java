@@ -8,6 +8,7 @@ import com.github.javaparser.ast.expr.ConditionalExpr;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
+import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.stmt.DoStmt;
 import com.github.javaparser.ast.stmt.ForStmt;
 import com.github.javaparser.ast.stmt.ForeachStmt;
@@ -16,9 +17,11 @@ import com.github.javaparser.ast.stmt.SwitchStmt;
 import com.github.javaparser.ast.stmt.WhileStmt;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 
+import com.github.javaparser.ast.expr.AnnotationExpr;
 import java.awt.Container;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.swing.JOptionPane;
@@ -43,7 +46,7 @@ public class MysteryGuest extends AbstractSmell {
 	ArrayList<TestSmellDescription> listTestSmells;
 	TestSmellDescription cadaTestSmell;	
 	private List<SmellyElement> smellyElementList;
-	private List<MethodUsage> methodConditional;
+	private ArrayList<MethodUsage> mysteryInstance;
 	
 	String className;
 	String filePath;
@@ -61,7 +64,6 @@ public class MysteryGuest extends AbstractSmell {
 		setClassName(name);
 		setFilePath(path);
 		smellyElementList = new ArrayList<>();
-		methodConditional = new ArrayList<>();
 	}
 	@Override
 	public String getSmellName() {
@@ -93,7 +95,7 @@ public class MysteryGuest extends AbstractSmell {
 												  CompilationUnit productionFileCompilationUnit,
 												  String testFileName, 
 												  String productionFileName) throws FileNotFoundException {
-		
+		mysteryInstance = new ArrayList<>();
 		listTestSmells = new ArrayList<TestSmellDescription>();
 		instances = new ArrayList<>();
 		MysteryGuest.ClassVisitor classVisitor;
@@ -122,121 +124,70 @@ public class MysteryGuest extends AbstractSmell {
 	}
 
 	private class ClassVisitor extends VoidVisitorAdapter<Void> {
+		
 		private MethodDeclaration currentMethod = null;
 		TestMethod testMethod;
 		private int magicCount = 0;
 		
-		// examine all methods in the test class
+		private List<String> mysteryTypes = new ArrayList<>(
+                Arrays.asList(
+                        "File",
+                        "FileOutputStream",
+                        "SQLiteOpenHelper",
+                        "SQLiteDatabase",
+                        "Cursor",
+                        "Context",
+                        "HttpClient",
+                        "HttpResponse",
+                        "HttpPost",
+                        "HttpGet",
+                        "SoapObject"
+                ));
+	
+
+     // examine all methods in the test class
         @Override
-        public void visit(MethodDeclaration n, Void arg){
+        public void visit(MethodDeclaration n, Void arg) {
             if (Util.isValidTestMethod(n)) {
                 currentMethod = n;
                 super.visit(n, arg);
-                testMethod = new TestMethod(n.getNameAsString());
-				
+
                 //reset values for next method
                 currentMethod = null;
-                magicCount = 0;
+//                mysteryCount = 0;
             }
         }
-
-        // examine the methods being called within the test method
         @Override
-        public void visit(MethodCallExpr n, Void arg){
+        public void visit(VariableDeclarationExpr n, Void arg) {
             super.visit(n, arg);
+            //Note: the null check limits the identification of variable types declared within the method body.
+            // Removing it will check for variables declared at the class level.
+            //TODO: to null check or not to null check???
             if (currentMethod != null) {
-                // if the name of a method being called start with 'assert'
-                if (n.getNameAsString().startsWith(("assert"))) {
-                    // checks all arguments of the assert method
-
-                    for (Expression argument : n.getArguments()) {
-                        // if the argument is a number
-                        if (Util.isNumber(argument.toString())) {
-                            MethodUsage verification = new MethodUsage(currentMethod.getNameAsString(),
-                                    "",n.getRange().get().begin.line+"");
-                            if (!instances.contains(verification)){
-                                instances.add(verification);
-                            }
+                boolean hasMystery = false;
+                for (String variableType : mysteryTypes) {
+                    //check if the type variable encountered is part of the mystery type collection
+                    if ((n.getVariable(0).getType().asString().equals(variableType))) {
+                        //check if the variable has been mocked
+                        for (AnnotationExpr annotation : n.getAnnotations()) {
+                            if (annotation.getNameAsString().equals("Mock") || annotation.getNameAsString().equals("Spy"))
+                                break;
                         }
-                        // if the argument contains an ObjectCreationExpr (e.g. assertEquals(new Integer(2),...)
-                        else if (argument instanceof ObjectCreationExpr) {
-                            checkObject( (ObjectCreationExpr) argument);
-                        }
-                        // if the argument contains an MethodCallExpr (e.g. assertEquals(someMethod(2),...)
-                        else if (argument instanceof MethodCallExpr) {
-                            checkMethodCall( (MethodCallExpr) argument);
-                        }
-                        //if the assertTrue has a number or methodcall with numbers
-                        else if (argument instanceof BinaryExpr) {
-                            checkBinary( (BinaryExpr) argument);
-                        }
+                        // variable is not mocked, hence it's a smell
+//                        mysteryCount++;
+                        hasMystery = true;
+//                        mysteryInstance.add(new MethodUsage(currentMethod.getNameAsString(), "",n.getRange().get().begin.line+""));
                     }
                 }
-            }
-        }
-
-
-        private boolean checkMethodCall(MethodCallExpr argument){
-            for (Expression objectArguments : argument.getArguments()) {
-                if (Util.isNumber(objectArguments.toString())) {
-                    MethodUsage verification = new MethodUsage(currentMethod.getNameAsString(), "",
-                            argument.getRange().get().begin.line+"");
-                    if (!instances.contains(verification)){
-                        instances.add(verification);
-                        insertTestSmell(argument.getRange().get(), this.currentMethod);
-                        return true;
-                    }
+                if (hasMystery) {
+                    MethodUsage methodUsage = new MethodUsage(currentMethod.getNameAsString(), "",currentMethod.getRange().get().begin.line + "-" + currentMethod.getRange().get().end.line);
+                    if (!mysteryInstance.contains(methodUsage))
+//                        mysteryInstance.add(methodUsage);
+                    	insertTestSmell(n.getRange().get(), this.currentMethod);
                 }
             }
-            return false;
         }
-
-        private boolean checkObject(ObjectCreationExpr argument){
-            for (Expression objectArguments : argument.getArguments()) {
-                if (Util.isNumber(objectArguments.toString())) {
-                    MethodUsage verification = new MethodUsage(currentMethod.getNameAsString(), "",
-                            argument.getRange().get().begin.line+"");
-                    if (!instances.contains(verification)){
-                        instances.add(verification);
-                        insertTestSmell(argument.getRange().get(), this.currentMethod);
-                        return true;
-                    }
-                }
-            }
-            return false;
-        }
-
-        private boolean checkBinary(BinaryExpr argument) {
-            if (Util.isNumber(argument.getLeft().toString()) ||
-                    Util.isNumber(argument.getRight().toString())) {
-                MethodUsage verification = new MethodUsage(currentMethod.getNameAsString(), "",
-                        argument.getRange().get().begin.line+"");
-                if (!instances.contains(verification)){
-                    instances.add(verification);
-                    insertTestSmell(argument.getRange().get(), this.currentMethod);
-                    return true;
-                }
-            }
-            else if (argument.getRight() instanceof MethodCallExpr && checkMethodCall((MethodCallExpr) argument.getRight())) {
-                return true;
-            }
-            else if (argument.getLeft() instanceof MethodCallExpr && checkMethodCall((MethodCallExpr) argument.getLeft())) {
-                return true;
-            }
-            else if (argument.getRight() instanceof ObjectCreationExpr && checkObject((ObjectCreationExpr) argument.getRight())) {
-                return true;
-            }
-            else if (argument.getLeft() instanceof ObjectCreationExpr && checkObject((ObjectCreationExpr) argument.getLeft())) {
-                return true;
-            }
-            else if (argument.getRight() instanceof BinaryExpr && checkBinary((BinaryExpr) argument.getRight())) {
-                return true;
-            }
-            else if (argument.getLeft() instanceof BinaryExpr && checkBinary((BinaryExpr) argument.getLeft())) {
-                return true;
-            }
-            return false;
-        }
+        
     }
 
 //		insertTestSmell(n.getRange().get(), this.testMethod);

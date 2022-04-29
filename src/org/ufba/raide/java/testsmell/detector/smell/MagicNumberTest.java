@@ -156,6 +156,7 @@ public class MagicNumberTest extends AbstractSmell {
                                     "",n.getRange().get().begin.line+"");
                             if (!instances.contains(verification)){
                                 instances.add(verification);
+                                insertTestSmell(argument.getRange().get(), this.currentMethod);
                             }
                         }
                         // if the argument contains an ObjectCreationExpr (e.g. assertEquals(new Integer(2),...)
