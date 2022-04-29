@@ -36,13 +36,14 @@ public class VerboseTest extends AbstractSmell {
 	ArrayList<TestSmellDescription> listTestSmells;
 	TestSmellDescription cadaTestSmell;	
 	private List<SmellyElement> smellyElementList;
-	private List<MethodUsage> methodConditional;
 	
 	String className;
 	String filePath;
 	
 	private boolean flag = false;
-    private ArrayList<MethodUsage> instanceIgnored;
+    private ArrayList<MethodUsage> instanceAbstract;
+    CompilationUnit testFileCompilationUnit = null;
+    public static int MAX_STATEMENTS = 30;
 
     @Override
 	public String getSmellName() {
@@ -62,7 +63,6 @@ public class VerboseTest extends AbstractSmell {
 		setClassName(name);
 		setFilePath(path);
 		smellyElementList = new ArrayList<>();
-		methodConditional = new ArrayList<>();
 	}
 
 	/**
@@ -92,7 +92,7 @@ public class VerboseTest extends AbstractSmell {
 												  String productionFileName) throws FileNotFoundException {
 		
 		listTestSmells = new ArrayList<TestSmellDescription>();
-		
+		instanceAbstract = new ArrayList<> (  );
 		VerboseTest.ClassVisitor classVisitor;
 		classVisitor = new VerboseTest.ClassVisitor();
 		classVisitor.visit(testFileCompilationUnit, null);
@@ -111,42 +111,37 @@ public class VerboseTest extends AbstractSmell {
 
 	private class ClassVisitor extends VoidVisitorAdapter<Void> {
 		TestClass testClass;
+		private MethodDeclaration currentMethod = null;
+        private int verboseCount = 0;
 		
+		// examine all methods in the test class
         @Override
         public void visit(MethodDeclaration n, Void arg) {
+            if (Util.isValidTestMethod(n)) {
+                currentMethod = n;
 
-            //JUnit 4
-            //check if test method has Ignore annotation
-            if (n.getAnnotationByName("Test").isPresent()) {
-                if (n.getAnnotationByName("Ignore").isPresent() || flag) {
-//                    instanceIgnored.add(new MethodUsage(n.getNameAsString(), "",n.getRange().get().begin.line + "-" + n.getRange().get().end.line));
-                    insertTestSmell(n.getRange().get(), n);
-                    return;
+                //method should not be abstract
+                if (!currentMethod.isAbstract()) {
+                    if (currentMethod.getBody().isPresent()) {
+                        //get the total number of statements contained in the method
+                        int inicio = currentMethod.getBody().get().getBegin().get().line;
+                        int fim = currentMethod.getBody().get().getEnd().get().line;
+                        if ((fim-inicio) >= MAX_STATEMENTS) {
+                            verboseCount++;
+                            instanceAbstract.add ( new MethodUsage (n.getNameAsString(), "",n.getRange().get().begin.line + "-" + n.getRange().get().end.line));
+                            insertTestSmell(n.getRange().get(), this.currentMethod);
+                        }
+                    }
                 }
-            }
 
-            //JUnit 3
-            //check if test method is not public
-            if (n.getNameAsString().toLowerCase().startsWith("test")) {
-                if (!n.getModifiers().contains(Modifier.PUBLIC)) {
-//                    instanceIgnored.add(new MethodUsage(n.getNameAsString(), "",n.getRange().get().begin.line + "-" + n.getRange().get().end.line));
-                    insertTestSmell(n.getRange().get(), n);
-                    return;
-                }
+                //reset values for next method
+                currentMethod = null;
+                verboseCount = 0;
             }
-        }
-        
-        @Override
-        public void visit(ClassOrInterfaceDeclaration n, Void arg) {
-            if (n.getAnnotationByName("Ignore").isPresent()) {
-                testClass = new TestClass(n.getNameAsString());
-                flag = true;
-            }
-            super.visit(n, arg);
         }
 	}
 	public void insertTestSmell (Range range, MethodDeclaration testMethod) {
-		cadaTestSmell = new TestSmellDescription("Ignored Test", 
+		cadaTestSmell = new TestSmellDescription("Verbose Test", 
 												 "....", 
 				 								 getFilePath(), 
 				 								 getClassName(),
