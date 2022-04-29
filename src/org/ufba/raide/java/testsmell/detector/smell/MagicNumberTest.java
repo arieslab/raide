@@ -3,8 +3,11 @@ package org.ufba.raide.java.testsmell.detector.smell;
 import com.github.javaparser.Range;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.expr.BinaryExpr;
 import com.github.javaparser.ast.expr.ConditionalExpr;
+import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
+import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.ast.stmt.DoStmt;
 import com.github.javaparser.ast.stmt.ForStmt;
 import com.github.javaparser.ast.stmt.ForeachStmt;
@@ -44,8 +47,8 @@ public class MagicNumberTest extends AbstractSmell {
 	
 	String className;
 	String filePath;
+	private ArrayList<MethodUsage> instances;
 	
-
 	public String getFilePath() {
 		return filePath;
 	}
@@ -92,10 +95,19 @@ public class MagicNumberTest extends AbstractSmell {
 												  String productionFileName) throws FileNotFoundException {
 		
 		listTestSmells = new ArrayList<TestSmellDescription>();
-		
+		instances = new ArrayList<>();
 		MagicNumberTest.ClassVisitor classVisitor;
 		classVisitor = new MagicNumberTest.ClassVisitor();
 		classVisitor.visit(testFileCompilationUnit, null);
+		
+		for (MethodUsage method : instances) {
+            TestMethod testClass = new TestMethod(method.getTestMethodName());
+            testClass.setRange(method.getRange());
+//            testClass.addDataItem("begin", method.getLine());
+//            testClass.addDataItem("end", method.getLine()); // [Remover]
+            testClass.setHasSmell(true);
+            smellyElementList.add(testClass);
+        }
 		
 		return listTestSmells;
 	}
@@ -111,122 +123,143 @@ public class MagicNumberTest extends AbstractSmell {
 
 	private class ClassVisitor extends VoidVisitorAdapter<Void> {
 		private MethodDeclaration currentMethod = null;
-		private int conditionCount, ifCount, switchCount, forCount, foreachCount, whileCount, doCount = 0;
 		TestMethod testMethod;
-
-		@Override
-		public void visit(MethodDeclaration n, Void arg) {
-			
-			if (Util.isValidTestMethod(n)) {
-				currentMethod = n;
-				testMethod = new TestMethod(n.getNameAsString());
-				testMethod.setHasSmell(false); 
-				super.visit(n, arg);
+		private int magicCount = 0;
+		
+		// examine all methods in the test class
+        @Override
+        public void visit(MethodDeclaration n, Void arg){
+            if (Util.isValidTestMethod(n)) {
+                currentMethod = n;
+                super.visit(n, arg);
+                testMethod = new TestMethod(n.getNameAsString());
 				
-				testMethod.setHasSmell(true);
+                //reset values for next method
+                currentMethod = null;
+                magicCount = 0;
+            }
+        }
 
-				currentMethod = null;
-                conditionCount = 0;
-                ifCount = 0;
-                switchCount = 0;
-                forCount = 0;
-                foreachCount = 0;
-                whileCount = 0;
-                doCount = 0;
-			}
-		}
-	
+        // examine the methods being called within the test method
+        @Override
+        public void visit(MethodCallExpr n, Void arg){
+            super.visit(n, arg);
+            if (currentMethod != null) {
+                // if the name of a method being called start with 'assert'
+                if (n.getNameAsString().startsWith(("assert"))) {
+                    // checks all arguments of the assert method
 
-		@Override
-		public void visit(IfStmt n, Void arg) {
-			super.visit(n, arg);
-			if (currentMethod != null) {
-			    ifCount++;
-			    methodConditional.add(new MethodUsage(currentMethod.getNameAsString(), "", n.getRange().get().begin.line + "-" + n.getRange().get().end.line));
-			    insertTestSmell(n.getRange().get(), this.testMethod);
-			}
-		}
-		
-		@Override
-		public void visit(SwitchStmt n, Void arg) {
-		    super.visit(n, arg);
-		    if (currentMethod != null) {
-		        switchCount++;
-		        methodConditional.add(new MethodUsage(currentMethod.getNameAsString(), "",n.getRange().get().begin.line + "-" + n.getRange().get().end.line));
-		        insertTestSmell(n.getRange().get(), this.testMethod);
-		    }
-		}
-		
-		@Override
-		public void visit(ConditionalExpr n, Void arg) {
-		    super.visit(n, arg);
-		    if (currentMethod != null) {
-		        conditionCount++;
-		        methodConditional.add(new MethodUsage(currentMethod.getNameAsString(), "",n.getRange().get().begin.line + "-" + n.getRange().get().end.line));
-		        insertTestSmell(n.getRange().get(), this.testMethod);
-		    }
-		}
-		
-		@Override
-		public void visit(ForStmt n, Void arg) {
-		    super.visit(n, arg);
-		    if (currentMethod != null) {
-		        forCount++;
-		        methodConditional.add(new MethodUsage(currentMethod.getNameAsString(), "", n.getRange().get().begin.line + "-" + n.getRange().get().end.line));
-		        insertTestSmell(n.getRange().get(), this.testMethod);
-		    }
-		}
-		
-		@Override
-		public void visit(ForeachStmt n, Void arg) {
-		    super.visit(n, arg);
-		    if (currentMethod != null) {
-		        foreachCount++;
-				methodConditional.add(new MethodUsage(currentMethod.getNameAsString(), "", n.getRange().get().begin.line + "-" + n.getRange().get().end.line));
-				insertTestSmell(n.getRange().get(), this.testMethod);
-		    }
-		}
-		
-		@Override
-		public void visit(WhileStmt n, Void arg) {
-		    super.visit(n, arg);
-		    if (currentMethod != null) {
-		        whileCount++;
-		        methodConditional.add(new MethodUsage(currentMethod.getNameAsString(), "", n.getRange().get().begin.line + "-" + n.getRange().get().end.line));
-		        insertTestSmell(n.getRange().get(), this.testMethod);
-		    }
-		}
-		
-		@Override
-		public void visit(DoStmt n, Void arg) {
-		    super.visit(n, arg);
-		    if (currentMethod != null) {
-		        doCount++;
-		        methodConditional.add(new MethodUsage(currentMethod.getNameAsString(), "", n.getRange().get().begin.line + "-" + n.getRange().get().end.line));
-		        insertTestSmell(n.getRange().get(), this.testMethod);
-		    }
-		}
-		
+                    for (Expression argument : n.getArguments()) {
+                        // if the argument is a number
+                        if (Util.isNumber(argument.toString())) {
+                            MethodUsage verification = new MethodUsage(currentMethod.getNameAsString(),
+                                    "",n.getRange().get().begin.line+"");
+                            if (!instances.contains(verification)){
+                                instances.add(verification);
+                            }
+                        }
+                        // if the argument contains an ObjectCreationExpr (e.g. assertEquals(new Integer(2),...)
+                        else if (argument instanceof ObjectCreationExpr) {
+                            checkObject( (ObjectCreationExpr) argument);
+                        }
+                        // if the argument contains an MethodCallExpr (e.g. assertEquals(someMethod(2),...)
+                        else if (argument instanceof MethodCallExpr) {
+                            checkMethodCall( (MethodCallExpr) argument);
+                        }
+                        //if the assertTrue has a number or methodcall with numbers
+                        else if (argument instanceof BinaryExpr) {
+                            checkBinary( (BinaryExpr) argument);
+                        }
+                    }
+                }
+            }
+        }
 
-	}
-	public void insertTestSmell (Range range, TestMethod testMethod) {
-		cadaTestSmell = new TestSmellDescription("Conditional Test Logic", 
-												 "Assertion Explanation", 
-				 								 getFilePath(), 
-				 								 getClassName(),
-				 								 testMethod.getElementName() + "() \n" ,
-				 								 range.begin.line + "", 
-				 								 range.end.line + "", 
-				 								 range.begin.line, 
-				 								 range.end.line,
-												 "");	
+
+        private boolean checkMethodCall(MethodCallExpr argument){
+            for (Expression objectArguments : argument.getArguments()) {
+                if (Util.isNumber(objectArguments.toString())) {
+                    MethodUsage verification = new MethodUsage(currentMethod.getNameAsString(), "",
+                            argument.getRange().get().begin.line+"");
+                    if (!instances.contains(verification)){
+                        instances.add(verification);
+                        insertTestSmell(argument.getRange().get(), this.currentMethod);
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        private boolean checkObject(ObjectCreationExpr argument){
+            for (Expression objectArguments : argument.getArguments()) {
+                if (Util.isNumber(objectArguments.toString())) {
+                    MethodUsage verification = new MethodUsage(currentMethod.getNameAsString(), "",
+                            argument.getRange().get().begin.line+"");
+                    if (!instances.contains(verification)){
+                        instances.add(verification);
+                        insertTestSmell(argument.getRange().get(), this.currentMethod);
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        private boolean checkBinary(BinaryExpr argument) {
+            if (Util.isNumber(argument.getLeft().toString()) ||
+                    Util.isNumber(argument.getRight().toString())) {
+                MethodUsage verification = new MethodUsage(currentMethod.getNameAsString(), "",
+                        argument.getRange().get().begin.line+"");
+                if (!instances.contains(verification)){
+                    instances.add(verification);
+                    insertTestSmell(argument.getRange().get(), this.currentMethod);
+                    return true;
+                }
+            }
+            else if (argument.getRight() instanceof MethodCallExpr && checkMethodCall((MethodCallExpr) argument.getRight())) {
+                return true;
+            }
+            else if (argument.getLeft() instanceof MethodCallExpr && checkMethodCall((MethodCallExpr) argument.getLeft())) {
+                return true;
+            }
+            else if (argument.getRight() instanceof ObjectCreationExpr && checkObject((ObjectCreationExpr) argument.getRight())) {
+                return true;
+            }
+            else if (argument.getLeft() instanceof ObjectCreationExpr && checkObject((ObjectCreationExpr) argument.getLeft())) {
+                return true;
+            }
+            else if (argument.getRight() instanceof BinaryExpr && checkBinary((BinaryExpr) argument.getRight())) {
+                return true;
+            }
+            else if (argument.getLeft() instanceof BinaryExpr && checkBinary((BinaryExpr) argument.getLeft())) {
+                return true;
+            }
+            return false;
+        }
+    }
+
+//		insertTestSmell(n.getRange().get(), this.testMethod);
+
+	public void insertTestSmell (Range range, MethodDeclaration testMethod) {
+		cadaTestSmell = new TestSmellDescription("Ignored Test", 
+				 "....", 
+				 getFilePath(), 
+				 getClassName(),
+				 testMethod.getName() + "() \n" ,
+				 range.begin.line + "", 
+				 range.end.line + "", 
+				 range.begin.line, 
+				 range.end.line,
+				 "");	
 		listTestSmells.add(cadaTestSmell);
-//		String smellLocation;
-//		smellLocation = "Classe " + getClassName() + "\n" + 
-//						"Método " + testMethod.getElementName() + "() \n" + 
-//						"Begin " + range.begin.line + "\n" +
-//						"End " + range.end.line;
-//		System.out.println(smellLocation);
+		
+		String smellLocation;
+		smellLocation = "Classe " + getClassName() + "\n" + 
+		"Método " + testMethod.getName() + "() \n" + 
+		"Begin " + range.begin.line + "\n" +
+		"End " + range.end.line;
+		System.out.println(smellLocation);
 	}
 	
 	public String getClassName() {
