@@ -11,8 +11,48 @@
 			<menu
                id="BadSmellsMenu"
                label="RAIDE">
-         	</menu>
+         	</menu>        	
          
+			<action
+			   class="org.ufba.raide.java.actions.TestSmellsMenu"
+			   icon="icons/ladybird.png"
+			   id="org.ufba.raide.java.actions.VerboseTest"
+			   label="Verbose Test"
+			   menubarPath="BadSmellsMenu/sampleGroup"
+			   tooltip="Verbose Test">
+			</action>
+			<action
+			   class="org.ufba.raide.java.actions.TestSmellsMenu"
+			   icon="icons/ladybird.png"
+			   id="org.ufba.raide.java.actions.UnknownTest"
+			   label="Unknown Test"
+			   menubarPath="BadSmellsMenu/sampleGroup"
+			   tooltip="Unknown Test">
+			</action>
+			<action
+			   class="org.ufba.raide.java.actions.TestSmellsMenu"
+			   icon="icons/ladybird.png"
+			   id="org.ufba.raide.java.actions.SleepyTest"
+			   label="Sleepy Test"
+			   menubarPath="BadSmellsMenu/sampleGroup"
+			   tooltip="Sleepy Test">
+			</action>
+			<action
+			   class="org.ufba.raide.java.actions.TestSmellsMenu"
+			   icon="icons/ladybird.png"
+			   id="org.ufba.raide.java.actions.SensitiveEquality"
+			   label="Sensitive Equality"
+			   menubarPath="BadSmellsMenu/sampleGroup"
+			   tooltip="Sensitive Equality">
+			</action>
+			<action
+			   class="org.ufba.raide.java.actions.TestSmellsMenu"
+			   icon="icons/ladybird.png"
+			   id="org.ufba.raide.java.actions.ResourceOptimism"
+			   label="Resource Optimism"
+			   menubarPath="BadSmellsMenu/sampleGroup"
+			   tooltip="Resource Optimism">
+			</action>
 		 	<action
 			   class="org.ufba.raide.java.actions.TestSmellsMenu"
 			   icon="icons/ladybird.png"
@@ -55,8 +95,6 @@
                menubarPath="BadSmellsMenu/sampleGroup"
                tooltip="Lazy Test">
          </action>
-         
-			------
 		<action
 		   class="org.ufba.raide.java.actions.TestSmellsMenu"
 		   icon="icons/ladybird.png"
@@ -269,6 +307,46 @@
             icon="icons/ladybird.png"
             id="org.ufba.raide.java.views.RedundantAssertion"
             name="Redundant Assertion"
+            restorable="true">
+      </view>
+      <view
+            category="org.ufba.raide"
+            class="org.ufba.raide.java.refactoring.views.ResourceOptimismView"
+            icon="icons/ladybird.png"
+            id="org.ufba.raide.java.views.ResourceOptimism"
+            name="Resource Optimism"
+            restorable="true">
+      </view>
+      <view
+            category="org.ufba.raide"
+            class="org.ufba.raide.java.refactoring.views.SensitiveEqualityView"
+            icon="icons/ladybird.png"
+            id="org.ufba.raide.java.views.SensitiveEquality"
+            name="Sensitive Equality"
+            restorable="true">
+      </view>
+      <view
+            category="org.ufba.raide"
+            class="org.ufba.raide.java.refactoring.views.UnknownTestView"
+            icon="icons/ladybird.png"
+            id="org.ufba.raide.java.views.UnknownTest"
+            name="Unknown Test"
+            restorable="true">
+      </view>
+      <view
+            category="org.ufba.raide"
+            class="org.ufba.raide.java.refactoring.views.SleepyTestView"
+            icon="icons/ladybird.png"
+            id="org.ufba.raide.java.views.SleepyTest"
+            name="Sleepy Test"
+            restorable="true">
+      </view>
+      <view
+            category="org.ufba.raide"
+            class="org.ufba.raide.java.refactoring.views.VerboseTestView"
+            icon="icons/ladybird.png"
+            id="org.ufba.raide.java.views.VerboseTest"
+            name="Verbose Test"
             restorable="true">
       </view>
    </extension>
