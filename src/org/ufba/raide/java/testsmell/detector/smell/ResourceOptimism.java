@@ -2,11 +2,14 @@ package org.ufba.raide.java.testsmell.detector.smell;
 
 import com.github.javaparser.Range;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.BinaryExpr;
 import com.github.javaparser.ast.expr.ConditionalExpr;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
+import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.stmt.DoStmt;
@@ -46,7 +49,7 @@ public class ResourceOptimism extends AbstractSmell {
 	ArrayList<TestSmellDescription> listTestSmells;
 	TestSmellDescription cadaTestSmell;	
 	private List<SmellyElement> smellyElementList;
-	private ArrayList<MethodUsage> mysteryInstance;
+	private ArrayList<MethodUsage> instanceResource;
 	
 	String className;
 	String filePath;
@@ -95,7 +98,7 @@ public class ResourceOptimism extends AbstractSmell {
 												  CompilationUnit productionFileCompilationUnit,
 												  String testFileName, 
 												  String productionFileName) throws FileNotFoundException {
-		mysteryInstance = new ArrayList<>();
+		instanceResource = new ArrayList<> ();
 		listTestSmells = new ArrayList<TestSmellDescription>();
 		instances = new ArrayList<>();
 		ResourceOptimism.ClassVisitor classVisitor;
@@ -126,71 +129,101 @@ public class ResourceOptimism extends AbstractSmell {
 	private class ClassVisitor extends VoidVisitorAdapter<Void> {
 		
 		private MethodDeclaration currentMethod = null;
-		TestMethod testMethod;
-		private int magicCount = 0;
+        private int resourceOptimismCount = 0;
+        private boolean hasSmell = false;
+        private List<String> methodVariables = new ArrayList<>();
+        private List<String> classVariables = new ArrayList<>();
 		
-		private List<String> mysteryTypes = new ArrayList<>(
-                Arrays.asList(
-                        "File",
-                        "FileOutputStream",
-                        "SQLiteOpenHelper",
-                        "SQLiteDatabase",
-                        "Cursor",
-                        "Context",
-                        "HttpClient",
-                        "HttpResponse",
-                        "HttpPost",
-                        "HttpGet",
-                        "SoapObject"
-                ));
-	
 
-     // examine all methods in the test class
-        @Override
+		@Override
         public void visit(MethodDeclaration n, Void arg) {
-            if (Util.isValidTestMethod(n)) {
+            if (Util.isValidTestMethod(n) || Util.isValidSetupMethod(n)) {
                 currentMethod = n;
                 super.visit(n, arg);
 
+                if(methodVariables.size() >= 1 || hasSmell==true){
+                    instanceResource.add(new MethodUsage (n.getNameAsString ( ), "",n.getRange().get().begin.line + "-" + n.getRange().get().end.line));
+            		insertTestSmell(n.getRange().get(), currentMethod);
+                }
+
                 //reset values for next method
                 currentMethod = null;
-//                mysteryCount = 0;
+                resourceOptimismCount = 0;
+                hasSmell = false;
+                methodVariables = new ArrayList<>();
             }
         }
+
         @Override
         public void visit(VariableDeclarationExpr n, Void arg) {
-            super.visit(n, arg);
-            //Note: the null check limits the identification of variable types declared within the method body.
-            // Removing it will check for variables declared at the class level.
-            //TODO: to null check or not to null check???
             if (currentMethod != null) {
-                boolean hasMystery = false;
-                for (String variableType : mysteryTypes) {
-                    //check if the type variable encountered is part of the mystery type collection
-                    if ((n.getVariable(0).getType().asString().equals(variableType))) {
-                        //check if the variable has been mocked
-                        for (AnnotationExpr annotation : n.getAnnotations()) {
-                            if (annotation.getNameAsString().equals("Mock") || annotation.getNameAsString().equals("Spy"))
-                                break;
-                        }
-                        // variable is not mocked, hence it's a smell
-//                        mysteryCount++;
-                        hasMystery = true;
-//                        mysteryInstance.add(new MethodUsage(currentMethod.getNameAsString(), "",n.getRange().get().begin.line+""));
+                for (VariableDeclarator variableDeclarator : n.getVariables()) {
+                    if (variableDeclarator.getType().equals("File")) {
+                        methodVariables.add(variableDeclarator.getNameAsString());
                     }
                 }
-                if (hasMystery) {
-                    MethodUsage methodUsage = new MethodUsage(currentMethod.getNameAsString(), "",currentMethod.getRange().get().begin.line + "-" + currentMethod.getRange().get().end.line);
-                    if (!mysteryInstance.contains(methodUsage))
-//                        mysteryInstance.add(methodUsage);
-                    	insertTestSmell(n.getRange().get(), this.currentMethod);
+            }
+            super.visit(n, arg);
+        }
+
+        @Override
+        public void visit(ObjectCreationExpr n, Void arg) {
+            if (currentMethod != null) {
+                if (n.getParentNode().isPresent()) {
+                    if (!(n.getParentNode().get() instanceof VariableDeclarator)) { // VariableDeclarator is handled in the override method
+                        if (n.getType().asString().equals("File")) {
+                            hasSmell = true;
+                        }
+                    }
+                }
+            }
+            super.visit(n, arg);
+        }
+
+        @Override
+        public void visit(VariableDeclarator n, Void arg) {
+            if (currentMethod != null) {
+                if (n.getType().asString().equals("File")) {
+                    methodVariables.add(n.getNameAsString());
+                }
+            } else {
+                if (n.getType().asString().equals("File")) {
+                    classVariables.add(n.getNameAsString());
+                }
+            }
+            super.visit(n, arg);
+        }
+
+        @Override
+        public void visit(FieldDeclaration n, Void arg) {
+            for (VariableDeclarator variableDeclarator : n.getVariables()) {
+                if (variableDeclarator.getType().equals("File")) {
+                    classVariables.add(variableDeclarator.getNameAsString());
+                }
+            }
+            super.visit(n, arg);
+        }
+
+
+        @Override
+        public void visit(MethodCallExpr n, Void arg) {
+            super.visit(n, arg);
+            if (currentMethod != null) {
+                if (n.getNameAsString().equals("exists") ||
+                        n.getNameAsString().equals("isFile") ||
+                        n.getNameAsString().equals("notExists")) {
+                    if (n.getScope().isPresent()) {
+                        if(n.getScope().get() instanceof NameExpr) {
+                            if (methodVariables.contains(((NameExpr) n.getScope().get()).getNameAsString())) {
+                                methodVariables.remove(((NameExpr) n.getScope().get()).getNameAsString());
+                            }
+                        }
+                    }
                 }
             }
         }
         
     }
-
-//		insertTestSmell(n.getRange().get(), this.testMethod);
 
 	public void insertTestSmell (Range range, MethodDeclaration testMethod) {
 		cadaTestSmell = new TestSmellDescription("Ignored Test", 

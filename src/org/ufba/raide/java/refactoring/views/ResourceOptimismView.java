@@ -140,13 +140,11 @@ import org.eclipse.ltk.ui.refactoring.RefactoringWizardOpenOperation;
 
 public class ResourceOptimismView extends ViewPart {
 	
-	private static final String MESSAGE_DIALOG_TITLE = "Conditional Test Logic";
+	private static final String MESSAGE_DIALOG_TITLE = "Resource Optimism";
 	private TableViewer tableViewer;
-	private TreeViewer treeViewer;
 	private Action identifyBadSmellsAction;
 	private Action doubleClickAction;
 	private Action applyRefactoringAction;
-	private IJavaProject selectedProject;
 	private IJavaProject activeProject;
 	private IPackageFragmentRoot selectedPackageFragmentRoot;
 	private IPackageFragment selectedPackageFragment;
@@ -154,7 +152,7 @@ public class ResourceOptimismView extends ViewPart {
 	private IType selectedType;
 	private CandidateRefactoring[] candidateRefactoringTable;
 	private IJavaProject project;
-	final String REFACTORING_DESCRIPTION = "Add Assertion Explanation";
+	final String REFACTORING_DESCRIPTION = "Refactoring ..";
 
 
     private List<TestSmellDescription> testSmells;
@@ -209,7 +207,7 @@ public class ResourceOptimismView extends ViewPart {
 			switch(index){
 				case 0:
 					if(entry instanceof AddExplanationCandidateRefactoring)
-						return "Conditional Test Logic";
+						return "Resource Optimism";
 					else
 						return "";
 				case 1:
