@@ -17,6 +17,11 @@ import org.ufba.raide.java.refactoring.views.MagicNumberTestView;
 import org.ufba.raide.java.refactoring.views.MysteryGuestView;
 import org.ufba.raide.java.refactoring.views.PrintStatementView;
 import org.ufba.raide.java.refactoring.views.RedundantAssertionView;
+import org.ufba.raide.java.refactoring.views.ResourceOptimismView;
+import org.ufba.raide.java.refactoring.views.SensitiveEqualityView;
+import org.ufba.raide.java.refactoring.views.SleepyTestView;
+import org.ufba.raide.java.refactoring.views.UnknownTestView;
+import org.ufba.raide.java.refactoring.views.VerboseTestView;
 import org.ufba.raide.java.refactoring.views.ConditionalTestLogicView;
 import org.ufba.raide.java.refactoring.views.ConstructionInstallationView;
 import org.ufba.raide.java.refactoring.views.DefaultTestView;
@@ -111,6 +116,22 @@ public class TestSmellDetector {
         else if (tipoTestSmell.equals(RedundantAssertionView.getMessageDialogTitle())) {
         	testSmells.add(new RedundantAssertion(getNameClass(), getFilePathClass()));        	
         } 
+        //
+        else if (tipoTestSmell.equals(ResourceOptimismView.getMessageDialogTitle())) {
+        	testSmells.add(new ResourceOptimism(getNameClass(), getFilePathClass()));        	
+        }
+        else if (tipoTestSmell.equals(SensitiveEqualityView.getMessageDialogTitle())) {
+        	testSmells.add(new SensitiveEquality(getNameClass(), getFilePathClass()));        	
+        }
+        else if (tipoTestSmell.equals(SleepyTestView.getMessageDialogTitle())) {
+        	testSmells.add(new SleepyTest(getNameClass(), getFilePathClass()));        	
+        }
+        else if (tipoTestSmell.equals(UnknownTestView.getMessageDialogTitle())) {
+        	testSmells.add(new UnknownTest(getNameClass(), getFilePathClass()));        	
+        }
+        else if (tipoTestSmell.equals(VerboseTestView.getMessageDialogTitle())) {
+        	testSmells.add(new VerboseTest(getNameClass(), getFilePathClass()));        	
+        }
     }
 
     /**

@@ -41,7 +41,7 @@ import org.ufba.raide.java.testsmell.Util;
  */
 
 
-public class MysteryGuest extends AbstractSmell {
+public class ResourceOptimism extends AbstractSmell {
 	
 	ArrayList<TestSmellDescription> listTestSmells;
 	TestSmellDescription cadaTestSmell;	
@@ -60,14 +60,14 @@ public class MysteryGuest extends AbstractSmell {
 		this.filePath = filePath;
 	}	
 
-	public MysteryGuest(String name, String path) {
+	public ResourceOptimism(String name, String path) {
 		setClassName(name);
 		setFilePath(path);
 		smellyElementList = new ArrayList<>();
 	}
 	@Override
 	public String getSmellName() {
-		return "Resource Optimism";
+		return "Mystery Guest";
 	}
 
 	/**
@@ -98,8 +98,8 @@ public class MysteryGuest extends AbstractSmell {
 		mysteryInstance = new ArrayList<>();
 		listTestSmells = new ArrayList<TestSmellDescription>();
 		instances = new ArrayList<>();
-		MysteryGuest.ClassVisitor classVisitor;
-		classVisitor = new MysteryGuest.ClassVisitor();
+		ResourceOptimism.ClassVisitor classVisitor;
+		classVisitor = new ResourceOptimism.ClassVisitor();
 		classVisitor.visit(testFileCompilationUnit, null);
 		
 		for (MethodUsage method : instances) {

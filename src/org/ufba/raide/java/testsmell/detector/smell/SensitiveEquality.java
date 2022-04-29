@@ -6,7 +6,9 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.BinaryExpr;
 import com.github.javaparser.ast.expr.ConditionalExpr;
 import com.github.javaparser.ast.expr.Expression;
+import com.github.javaparser.ast.expr.FieldAccessExpr;
 import com.github.javaparser.ast.expr.MethodCallExpr;
+import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.stmt.DoStmt;
@@ -41,7 +43,7 @@ import org.ufba.raide.java.testsmell.Util;
  */
 
 
-public class MysteryGuest extends AbstractSmell {
+public class SensitiveEquality extends AbstractSmell {
 	
 	ArrayList<TestSmellDescription> listTestSmells;
 	TestSmellDescription cadaTestSmell;	
@@ -51,6 +53,7 @@ public class MysteryGuest extends AbstractSmell {
 	String className;
 	String filePath;
 	private ArrayList<MethodUsage> instances;
+	private List<MethodUsage> methodPrints;
 	
 	public String getFilePath() {
 		return filePath;
@@ -60,14 +63,14 @@ public class MysteryGuest extends AbstractSmell {
 		this.filePath = filePath;
 	}	
 
-	public MysteryGuest(String name, String path) {
+	public SensitiveEquality(String name, String path) {
 		setClassName(name);
 		setFilePath(path);
 		smellyElementList = new ArrayList<>();
 	}
 	@Override
 	public String getSmellName() {
-		return "Resource Optimism";
+		return "Sensitive Equality";
 	}
 
 	/**
@@ -95,12 +98,13 @@ public class MysteryGuest extends AbstractSmell {
 												  CompilationUnit productionFileCompilationUnit,
 												  String testFileName, 
 												  String productionFileName) throws FileNotFoundException {
-		mysteryInstance = new ArrayList<>();
+		methodPrints = new ArrayList<>();
 		listTestSmells = new ArrayList<TestSmellDescription>();
 		instances = new ArrayList<>();
-		MysteryGuest.ClassVisitor classVisitor;
-		classVisitor = new MysteryGuest.ClassVisitor();
+		SensitiveEquality.ClassVisitor classVisitor;
+		classVisitor = new SensitiveEquality.ClassVisitor();
 		classVisitor.visit(testFileCompilationUnit, null);
+		
 		
 		for (MethodUsage method : instances) {
             TestMethod testClass = new TestMethod(method.getTestMethodName());
@@ -126,24 +130,7 @@ public class MysteryGuest extends AbstractSmell {
 	private class ClassVisitor extends VoidVisitorAdapter<Void> {
 		
 		private MethodDeclaration currentMethod = null;
-		TestMethod testMethod;
-		private int magicCount = 0;
-		
-		private List<String> mysteryTypes = new ArrayList<>(
-                Arrays.asList(
-                        "File",
-                        "FileOutputStream",
-                        "SQLiteOpenHelper",
-                        "SQLiteDatabase",
-                        "Cursor",
-                        "Context",
-                        "HttpClient",
-                        "HttpResponse",
-                        "HttpPost",
-                        "HttpGet",
-                        "SoapObject"
-                ));
-	
+	    int countPrint = 0;
 
      // examine all methods in the test class
         @Override
@@ -154,36 +141,33 @@ public class MysteryGuest extends AbstractSmell {
 
                 //reset values for next method
                 currentMethod = null;
-//                mysteryCount = 0;
+                countPrint = 0;
             }
         }
+     // examine the methods being called within the test method
         @Override
-        public void visit(VariableDeclarationExpr n, Void arg) {
+        public void visit(MethodCallExpr n, Void arg) {
             super.visit(n, arg);
-            //Note: the null check limits the identification of variable types declared within the method body.
-            // Removing it will check for variables declared at the class level.
-            //TODO: to null check or not to null check???
             if (currentMethod != null) {
-                boolean hasMystery = false;
-                for (String variableType : mysteryTypes) {
-                    //check if the type variable encountered is part of the mystery type collection
-                    if ((n.getVariable(0).getType().asString().equals(variableType))) {
-                        //check if the variable has been mocked
-                        for (AnnotationExpr annotation : n.getAnnotations()) {
-                            if (annotation.getNameAsString().equals("Mock") || annotation.getNameAsString().equals("Spy"))
-                                break;
+                // if the name of a method being called is 'print' or 'println' or 'printf' or 'write'
+                if (n.getNameAsString().equals("print") || n.getNameAsString().equals("println") || n.getNameAsString().equals("printf") || n.getNameAsString().equals("write")) {
+                    //check the scope of the method & proceed only if the scope is "out"
+                    if ((n.getScope().isPresent() &&
+                            n.getScope().get() instanceof FieldAccessExpr &&
+                            (((FieldAccessExpr) n.getScope().get())).getNameAsString().equals("out"))) {
+
+                        FieldAccessExpr f1 = (((FieldAccessExpr) n.getScope().get()));
+
+                        //check the scope of the field & proceed only if the scope is "System"
+                        if ((f1.getScope() != null &&
+                                f1.getScope() instanceof NameExpr &&
+                                ((NameExpr) f1.getScope()).getNameAsString().equals("System"))) {
+                            //a print statement exists in the method body
+                            countPrint++;
+                            methodPrints.add(new MethodUsage(currentMethod.getNameAsString(), "",n.getRange().get().begin.line+""));
+                            insertTestSmell(n.getRange().get(), this.currentMethod);
                         }
-                        // variable is not mocked, hence it's a smell
-//                        mysteryCount++;
-                        hasMystery = true;
-//                        mysteryInstance.add(new MethodUsage(currentMethod.getNameAsString(), "",n.getRange().get().begin.line+""));
                     }
-                }
-                if (hasMystery) {
-                    MethodUsage methodUsage = new MethodUsage(currentMethod.getNameAsString(), "",currentMethod.getRange().get().begin.line + "-" + currentMethod.getRange().get().end.line);
-                    if (!mysteryInstance.contains(methodUsage))
-//                        mysteryInstance.add(methodUsage);
-                    	insertTestSmell(n.getRange().get(), this.currentMethod);
                 }
             }
         }
@@ -205,12 +189,12 @@ public class MysteryGuest extends AbstractSmell {
 				 "");	
 		listTestSmells.add(cadaTestSmell);
 		
-//		String smellLocation;
-//		smellLocation = "Classe " + getClassName() + "\n" + 
-//		"Método " + testMethod.getName() + "() \n" + 
-//		"Begin " + range.begin.line + "\n" +
-//		"End " + range.end.line;
-//		System.out.println(smellLocation);
+		String smellLocation;
+		smellLocation = "Classe " + getClassName() + "\n" + 
+		"Método " + testMethod.getName() + "() \n" + 
+		"Begin " + range.begin.line + "\n" +
+		"End " + range.end.line;
+		System.out.println(smellLocation);
 	}
 	
 	public String getClassName() {
