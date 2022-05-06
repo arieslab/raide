@@ -5,6 +5,7 @@ import com.github.javaparser.ParseException;
 import com.github.javaparser.ast.CompilationUnit;
 
 import org.apache.commons.lang3.StringUtils;
+import org.ufba.raide.java.refactoring.views.AllTestSmellsView;
 import org.ufba.raide.java.refactoring.views.AssertionRouletteView;
 import org.ufba.raide.java.refactoring.views.DuplicateAssertView;
 import org.ufba.raide.java.refactoring.views.EagerTestView;
@@ -131,6 +132,9 @@ public class TestSmellDetector {
         }
         else if (tipoTestSmell.equals(VerboseTestView.getMessageDialogTitle())) {
         	testSmells.add(new VerboseTest(getNameClass(), getFilePathClass()));        	
+        }
+        else if (tipoTestSmell.equals(AllTestSmellsView.getMessageDialogTitle())) {
+        	testSmells.add(new AllTestSmells(getNameClass(), getFilePathClass()));        	
         }
     }
 

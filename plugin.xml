@@ -11,7 +11,16 @@
 			<menu
                id="BadSmellsMenu"
                label="RAIDE">
-         	</menu>        	
+         	</menu> 
+         	
+         	<action
+			   class="org.ufba.raide.java.actions.TestSmellsMenu"
+			   icon="icons/csv-file.png"
+			   id="org.ufba.raide.java.actions.AllTestSmells"
+			   label="All Test Smells"
+			   menubarPath="BadSmellsMenu/sampleGroup"
+			   tooltip="All Test Smells">
+			</action>       	
          
 			<action
 			   class="org.ufba.raide.java.actions.TestSmellsMenu"
@@ -347,6 +356,14 @@
             icon="icons/ladybird.png"
             id="org.ufba.raide.java.views.VerboseTest"
             name="Verbose Test"
+            restorable="true">
+      </view>
+      <view
+            category="org.ufba.raide"
+            class="org.ufba.raide.java.refactoring.views.AllTestSmellsView"
+            icon="icons/csv-file.png"
+            id="org.ufba.raide.java.views.AllTestSmells"
+            name="Export file CSV"
             restorable="true">
       </view>
    </extension>

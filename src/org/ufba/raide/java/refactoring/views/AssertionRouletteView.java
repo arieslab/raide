@@ -144,6 +144,7 @@ public class AssertionRouletteView extends ViewPart {
 	private TableViewer tableViewer;
 	private TreeViewer treeViewer;
 	private Action identifyBadSmellsAction;
+	private Action exportFileCsvAction;
 	private Action doubleClickAction;
 	private Action applyRefactoringAction;
 	private IJavaProject selectedProject;
@@ -488,6 +489,7 @@ public class AssertionRouletteView extends ViewPart {
 
 	private void fillLocalToolBar(IToolBarManager manager) {
 		manager.add(identifyBadSmellsAction);
+		manager.add(exportFileCsvAction);
 		manager.add(applyRefactoringAction);
 	}
 	private void callAssertionRoulette() throws IOException{
@@ -559,8 +561,9 @@ public class AssertionRouletteView extends ViewPart {
 				candidateRefactoringTable = getTable();
 					
 				tableViewer.setContentProvider(new ViewContentProvider());
-				if(wasAlreadyOpen)
+				if(wasAlreadyOpen) {
 					openPackageExplorerViewPart();
+				}
 				if (candidateRefactoringTable == null || candidateRefactoringTable.length == 0 ) {
 					JOptionPane.showMessageDialog(null, "Assertion Roulette not found.");				
 				}
@@ -570,6 +573,18 @@ public class AssertionRouletteView extends ViewPart {
 		identifyBadSmellsAction.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages().
 				getImageDescriptor(ISharedImages.IMG_OBJS_INFO_TSK));
 		identifyBadSmellsAction.setEnabled(false);
+		////
+		exportFileCsvAction = new Action() {
+			public void run() {
+				exportFileCsvAction.setEnabled(true);			
+			}
+		};
+		exportFileCsvAction.setToolTipText("Export file CSV");
+		exportFileCsvAction.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages().
+				getImageDescriptor(ISharedImages.IMG_OBJ_FILE));
+		exportFileCsvAction.setEnabled(false);
+		///
+		
 		
 		doubleClickAction = new Action() {
 			public void run() {

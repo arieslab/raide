@@ -138,12 +138,13 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizardOpenOperation;
 
-public class VerboseTestView extends ViewPart {
+public class AllTestSmellsView extends ViewPart {
 	
-	private static final String MESSAGE_DIALOG_TITLE = "Verbose Test";
+	private static final String MESSAGE_DIALOG_TITLE = "All Test Smells";
 	private TableViewer tableViewer;
 	private TreeViewer treeViewer;
 	private Action identifyBadSmellsAction;
+	private Action exportFileCsvAction;
 	private Action doubleClickAction;
 	private Action applyRefactoringAction;
 	private IJavaProject selectedProject;
@@ -154,7 +155,7 @@ public class VerboseTestView extends ViewPart {
 	private IType selectedType;
 	private CandidateRefactoring[] candidateRefactoringTable;
 	private IJavaProject project;
-	final String REFACTORING_DESCRIPTION = "Refactoring";
+	final String REFACTORING_DESCRIPTION = "Add Assertion Explanation";
 
 
     private List<TestSmellDescription> testSmells;
@@ -209,7 +210,7 @@ public class VerboseTestView extends ViewPart {
 			switch(index){
 				case 0:
 					if(entry instanceof AddExplanationCandidateRefactoring)
-						return "Verbose Test";
+						return "All Test Smells";
 					else
 						return "";
 				case 1:
@@ -217,11 +218,9 @@ public class VerboseTestView extends ViewPart {
 				case 2:
 					return getNumberString(entry.getSourceEntity2());
 				case 3:
-					return String.valueOf(entry.getPosition().offset);
-				case 4:
 					return entry.getSourceClass().getFilePath();
 					//return "Caminho do arquivo";
-				case 5:
+				case 4:
 					return REFACTORING_DESCRIPTION;
 				default:
 					return "";
@@ -313,10 +312,9 @@ public class VerboseTestView extends ViewPart {
 		/* Ordem de apresentação:
 		 * 1a Coluna: TestSmell
 		 * 2a Coluna: Source Method
-		 * 3a Coluna: Linha inicial
-		 * 4a Coluna: Linha final
-		 * 5a Coluna: Refactoring Type		 * 
-		 * 6a Coluna: Caminho do arquivo
+		 * 3a Coluna: Linha
+		 * 4a Coluna: Refactoring Type		 * 
+		 * 5a Coluna: Caminho do arquivo
 		 * */
 		tableViewer = new TableViewer(parent, SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER | SWT.FULL_SELECTION);
 		tableViewer.setContentProvider(new ViewContentProvider());
@@ -326,7 +324,6 @@ public class VerboseTestView extends ViewPart {
 		TableLayout layout = new TableLayout();
 		layout.addColumnData(new ColumnWeightData(15, true));
 		layout.addColumnData(new ColumnWeightData(25, true));
-		layout.addColumnData(new ColumnWeightData(8, true));
 		layout.addColumnData(new ColumnWeightData(8, true));
 		layout.addColumnData(new ColumnWeightData(15, true));
 		layout.addColumnData(new ColumnWeightData(20, true));
@@ -342,21 +339,17 @@ public class VerboseTestView extends ViewPart {
 		column1.setResizable(true);
 		column1.pack();
 		TableColumn column2 = new TableColumn(tableViewer.getTable(),SWT.LEFT);
-		column2.setText("Begin");
+		column2.setText("Line");
 		column2.setResizable(true);
 		column2.pack();
 		TableColumn column3 = new TableColumn(tableViewer.getTable(),SWT.LEFT);
-		column3.setText("End");
+		column3.setText("File Path");
 		column3.setResizable(true);
 		column3.pack();
 		TableColumn column4 = new TableColumn(tableViewer.getTable(),SWT.LEFT);
-		column4.setText("File Path");
+		column4.setText("Refactoring Type");
 		column4.setResizable(true);
 		column4.pack();
-		TableColumn column5 = new TableColumn(tableViewer.getTable(),SWT.LEFT);
-		column5.setText("Refactoring Type");
-		column5.setResizable(true);
-		column5.pack();
 		
 		
 		tableViewer.addSelectionChangedListener(new ISelectionChangedListener() {
@@ -496,6 +489,7 @@ public class VerboseTestView extends ViewPart {
 
 	private void fillLocalToolBar(IToolBarManager manager) {
 		manager.add(identifyBadSmellsAction);
+		manager.add(exportFileCsvAction);
 		manager.add(applyRefactoringAction);
 	}
 	private void callAssertionRoulette() throws IOException{
@@ -567,10 +561,11 @@ public class VerboseTestView extends ViewPart {
 				candidateRefactoringTable = getTable();
 					
 				tableViewer.setContentProvider(new ViewContentProvider());
-				if(wasAlreadyOpen)
+				if(wasAlreadyOpen) {
 					openPackageExplorerViewPart();
+				}
 				if (candidateRefactoringTable == null || candidateRefactoringTable.length == 0 ) {
-					JOptionPane.showMessageDialog(null, "Verbose Test Logic not found.");				
+					JOptionPane.showMessageDialog(null, "Assertion Roulette not found.");				
 				}
 			}
 		};
@@ -578,6 +573,18 @@ public class VerboseTestView extends ViewPart {
 		identifyBadSmellsAction.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages().
 				getImageDescriptor(ISharedImages.IMG_OBJS_INFO_TSK));
 		identifyBadSmellsAction.setEnabled(false);
+		////
+		exportFileCsvAction = new Action() {
+			public void run() {
+				exportFileCsvAction.setEnabled(true);			
+			}
+		};
+		exportFileCsvAction.setToolTipText("Export file CSV");
+		exportFileCsvAction.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages().
+				getImageDescriptor(ISharedImages.IMG_OBJ_FILE));
+		exportFileCsvAction.setEnabled(false);
+		///
+		
 		
 		doubleClickAction = new Action() {
 			public void run() {
@@ -983,8 +990,7 @@ public class VerboseTestView extends ViewPart {
 					
 					MyClass minhaOutraClasse = new MyClass(testSmells.get(i).getClassName(), testSmells.get(i).getClassName());
 					MyMethod meuMeuMetodo = new MyMethod(testSmells.get(i).getClassName(), testSmells.get(i).getMethodName() + testSmells.get(i).getLinePositionBegin(), "");
-					Position minhaPosicao = new Position(Integer.valueOf(testSmells.get(i).getLinePositionEnd().toString()), 0);
-					addExp = new AddExplanationCandidateRefactoring(system, minhaClasse, minhaOutraClasse, meuMeuMetodo, testSmells.get(i).getLinePositionBegin(), minhaPosicao );
+					addExp = new AddExplanationCandidateRefactoring(system, minhaClasse, minhaOutraClasse, meuMeuMetodo, testSmells.get(i).getLinePositionBegin(), null );
 					moveMethodCandidateList.add(addExp);
 				}
 				table = new CandidateRefactoring[moveMethodCandidateList.size()];

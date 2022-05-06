@@ -110,6 +110,10 @@ public class TestSmellsMenu implements IWorkbenchWindowActionDelegate {
 			else if(action.getId().equals("org.ufba.raide.java.actions.VerboseTest")) {
 				page.showView("org.ufba.raide.java.views.VerboseTest");
 			}
+			else if(action.getId().equals("org.ufba.raide.java.actions.AllTestSmells")) {
+				page.showView("org.ufba.raide.java.views.AllTestSmells");
+			}
+			
 			
 		} catch (PartInitException e) {
 			e.printStackTrace();
