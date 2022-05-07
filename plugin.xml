@@ -363,8 +363,8 @@
             class="org.ufba.raide.java.refactoring.views.AllTestSmellsView"
             icon="icons/csv-file.png"
             id="org.ufba.raide.java.views.AllTestSmells"
-            name="Export file CSV"
-            restorable="true">
+            name="All Test Smells Report"
+            restorable="false">
       </view>
    </extension>
    <extension

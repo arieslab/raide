@@ -12,12 +12,15 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeSelection;
+import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
+import org.ufba.raide.java.refactoring.views.AllTestSmellsView;
 import org.ufba.raide.java.refactoring.views.DuplicateAssertView;
 
 /**
