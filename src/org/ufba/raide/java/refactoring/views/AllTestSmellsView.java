@@ -85,9 +85,28 @@ public class AllTestSmellsView extends ViewPart {
 		try {
 			final List<String> testSmellsTypes = new ArrayList<>();
 			testSmellsTypes.add(AssertionRouletteView.getMessageDialogTitle());
-			testSmellsTypes.add(DuplicateAssertView.getMessageDialogTitle());
 			testSmellsTypes.add(ConditionalTestLogicView.getMessageDialogTitle());
+			testSmellsTypes.add(ConstructionInstallationView.getMessageDialogTitle());
+			testSmellsTypes.add(DefaultTestView.getMessageDialogTitle());
+			testSmellsTypes.add(DuplicateAssertView.getMessageDialogTitle());
+			testSmellsTypes.add(EagerTestView.getMessageDialogTitle());
+			testSmellsTypes.add(EmptyTestView.getMessageDialogTitle());
+			testSmellsTypes.add(ExceptionCatchingThrowingView.getMessageDialogTitle());
+			testSmellsTypes.add(GeneralFixtureView.getMessageDialogTitle());
+			testSmellsTypes.add(IgnoredTestView.getMessageDialogTitle());
+			testSmellsTypes.add(LazyTestView.getMessageDialogTitle());
+			testSmellsTypes.add(MagicNumberTestView.getMessageDialogTitle());
+			testSmellsTypes.add(MysteryGuestView.getMessageDialogTitle());
+			testSmellsTypes.add(PrintStatementView.getMessageDialogTitle());
+			testSmellsTypes.add(RedundantAssertionView.getMessageDialogTitle());
+			testSmellsTypes.add(ResourceOptimismView.getMessageDialogTitle());
+			testSmellsTypes.add(SensitiveEqualityView.getMessageDialogTitle());
+			testSmellsTypes.add(SleepyTestView.getMessageDialogTitle());
+			testSmellsTypes.add(UnknownTestView.getMessageDialogTitle());
+			testSmellsTypes.add(VerboseTestView.getMessageDialogTitle());
+			
 
+		
 			List<TestFile> projectTestFiles = getProjectTestFiles();
 			File results = new File(resultsCsvFile);
 			FileOutputStream fos = new FileOutputStream(results);
