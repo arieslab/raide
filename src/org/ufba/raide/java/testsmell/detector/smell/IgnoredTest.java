@@ -147,7 +147,7 @@ public class IgnoredTest extends AbstractSmell {
 	}
 	public void insertTestSmell (Range range, MethodDeclaration testMethod) {
 		cadaTestSmell = new TestSmellDescription("Ignored Test", 
-												 "....", 
+												 "Remove Method", 
 				 								 getFilePath(), 
 				 								 getClassName(),
 				 								 testMethod.getName() + "() \n" ,
@@ -156,7 +156,8 @@ public class IgnoredTest extends AbstractSmell {
 				 								 range.begin.line, 
 				 								 range.end.line,
 												 "",
-												 null);	
+												 range,
+												 testMethod);	
 		listTestSmells.add(cadaTestSmell);
 //		String smellLocation;
 //		smellLocation = "Classe " + getClassName() + "\n" + 

@@ -117,9 +117,10 @@ public class EmptyTest extends AbstractSmell {
 
 	private class ClassVisitor extends VoidVisitorAdapter<Void> {
 		TestClass testClass;
+		TestMethod testMethod;
 		@Override
 		public void visit(MethodDeclaration n, Void arg) {
-			
+			testMethod = new TestMethod(n.getNameAsString());
 			if (Util.isValidTestMethod(n)) {
 				//method should not be abstract
                 if (!n.isAbstract()) {
@@ -136,24 +137,25 @@ public class EmptyTest extends AbstractSmell {
 		}
 
 	}
-	public void insertTestSmell (MethodDeclaration testMethod) {
+	public void insertTestSmell (MethodDeclaration methodDeclaration) {
 		cadaTestSmell = new TestSmellDescription("Empty Test", 
 												 "Remove Method", 
 				 								 getFilePath(), 
 				 								 getClassName(),
-				 								 testMethod.getName() + "() \n" ,
-				 								 testMethod.getRange().get().begin.line + "", 
-				 								 testMethod.getRange().get().end.line + "", 
-				 								 testMethod.getRange().get().begin.line, 
-				 								 testMethod.getRange().get().end.line,
+												 methodDeclaration.getName() + "() \n" ,
+												 methodDeclaration.getRange().get().begin.line + "", 
+												 methodDeclaration.getRange().get().end.line + "", 
+												 methodDeclaration.getRange().get().begin.line, 
+												 methodDeclaration.getRange().get().end.line,
 												 "",
-												 testMethod.getRange().get());	
+												 methodDeclaration.getRange().get(),
+												 methodDeclaration);	
 		listTestSmells.add(cadaTestSmell);
 		String smellLocation;
 		smellLocation = "Classe " + getClassName() + "\n" + 
-						"Método " + testMethod.getName() + "() \n" + 
-						"Begin " + testMethod.getRange().get().begin.line + "\n" +
-						"End " + testMethod.getRange().get().end.line;
+						"Método " + methodDeclaration.getName() + "() \n" + 
+						"Begin " + methodDeclaration.getRange().get().begin.line + "\n" +
+						"End " + methodDeclaration.getRange().get().end.line;
 		System.out.println(smellLocation);
 	}
 	

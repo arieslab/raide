@@ -126,7 +126,7 @@ public class DistanceMatrix {
 	    							if(containerFieldIsAccessed) {
 	    								MyClass mySourceClass = classList.get(classIndexMap.get(sourceClass));
 	    								MyClass myTargetClass = classList.get(classIndexMap.get(targetClass));
-	    								AddExplanationCandidateRefactoring candidate = new AddExplanationCandidateRefactoring(system,mySourceClass,myTargetClass,method, null);
+	    								AddExplanationCandidateRefactoring candidate = new AddExplanationCandidateRefactoring(system,mySourceClass, myTargetClass, method, "", null);
 	    								Map<MethodInvocation, MethodDeclaration> additionalMethodsToBeMoved = candidate.getAdditionalMethodsToBeMoved();
 	    								Collection<MethodDeclaration> values = additionalMethodsToBeMoved.values();
 	    								Set<String> methodEntitySet = entityMap.get(method.toString());
@@ -229,7 +229,7 @@ public class DistanceMatrix {
 								else {
 									MyClass mySourceClass = classList.get(classIndexMap.get(sourceClass));
 									MyClass myTargetClass = classList.get(classIndexMap.get(targetClass));
-									AddExplanationCandidateRefactoring candidate = new AddExplanationCandidateRefactoring(system,mySourceClass,myTargetClass,method, null);
+									AddExplanationCandidateRefactoring candidate = new AddExplanationCandidateRefactoring(system, mySourceClass, myTargetClass, method,  "", null);
 									Map<MethodInvocation, MethodDeclaration> additionalMethodsToBeMoved = candidate.getAdditionalMethodsToBeMoved();
 									Collection<MethodDeclaration> values = additionalMethodsToBeMoved.values();
 									Set<String> methodEntitySet = entityMap.get(method.toString());

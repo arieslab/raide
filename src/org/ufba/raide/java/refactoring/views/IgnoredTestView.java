@@ -1,14 +1,11 @@
 package org.ufba.raide.java.refactoring.views;
 
-import java.awt.Color;
-import java.awt.Window;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -17,18 +14,10 @@ import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.ListIterator;
-import java.util.Map;
 import java.util.Set;
 
 import javax.swing.JOptionPane;
@@ -45,18 +34,9 @@ import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
-import org.eclipse.swt.widgets.Tree;
-import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.ui.part.*;
 import org.eclipse.ui.progress.IProgressService;
-import org.apache.commons.lang3.text.StrTokenizer;
-import org.eclipse.core.commands.operations.IOperationHistoryListener;
-import org.eclipse.core.commands.operations.OperationHistoryEvent;
-import org.eclipse.core.internal.runtime.LocalizationUtils;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -65,7 +45,6 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.JFaceResources;
-import org.eclipse.jface.resource.ResourceManager;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.Position;
@@ -85,9 +64,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.jface.action.*;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.ui.*;
-import org.eclipse.ui.ide.IDE;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.ufba.raide.Activator;
@@ -96,57 +73,41 @@ import org.ufba.raide.java.ast.ClassObject;
 import org.ufba.raide.java.ast.CompilationErrorDetectedException;
 import org.ufba.raide.java.ast.CompilationUnitCache;
 import org.ufba.raide.java.ast.SystemObject;
-import org.ufba.raide.java.clone.parsers.CloneInstance;
-import org.ufba.raide.java.distance.AddExplanationCandidateRefactoring;
 import org.ufba.raide.java.distance.CandidateRefactoring;
 import org.ufba.raide.java.distance.DistanceMatrix;
-import org.ufba.raide.java.distance.ExtractClassCandidateGroup;
-import org.ufba.raide.java.distance.ExtractClassCandidateRefactoring;
 import org.ufba.raide.java.distance.MyClass;
 import org.ufba.raide.java.distance.MyMethod;
 import org.ufba.raide.java.distance.MySystem;
+import org.ufba.raide.java.distance.RemoveMethodCandidateRefactoring;
 import org.ufba.raide.java.filedetector.RAIDEUtils;
-import org.ufba.raide.java.filedetector.ResultsWriterFileDetector;
 import org.ufba.raide.java.filedetector.TestFileDetectorMain;
 import org.ufba.raide.java.filedetector.TrataStringCaminhoTeste;
 import org.ufba.raide.java.filemapping.FileMappingMain;
 import org.ufba.raide.java.preferences.PreferenceConstants;
-import org.ufba.raide.java.refactoring.manipulators.ASTSlice;
-import org.ufba.raide.java.refactoring.manipulators.ExtractClassRefactoring;
-import org.ufba.raide.java.refactoring.manipulators.MoveMethodRefactoring;
 import org.ufba.raide.java.refactoring.views.CodeSmellPackageExplorer.CodeSmellType;
-import org.ufba.raide.java.refactoring.views.DuplicateAssertView.ViewContentProvider;
-import org.ufba.raide.java.testsmell.AbstractSmell;
-import org.ufba.raide.java.testsmell.ResultsWriter;
 import org.ufba.raide.java.testsmell.TestFile;
 import org.ufba.raide.java.testsmell.TestSmellDescription;
 import org.ufba.raide.java.testsmell.TestSmellDetector;
+
+import com.github.javaparser.Range;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.IWorkingCopy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.VariableDeclaration;
-import org.eclipse.jdt.internal.core.builder.SourceFile;
 import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.ltk.core.refactoring.Refactoring;
-import org.eclipse.ltk.ui.refactoring.RefactoringWizardOpenOperation;
 
 public class IgnoredTestView extends ViewPart {
 	
 	private static final String MESSAGE_DIALOG_TITLE = "Ignored Test";
 	private TableViewer tableViewer;
-	private TreeViewer treeViewer;
 	private Action identifyBadSmellsAction;
 	private Action doubleClickAction;
 	private Action applyRefactoringAction;
-	private IJavaProject selectedProject;
 	private IJavaProject activeProject;
 	private IPackageFragmentRoot selectedPackageFragmentRoot;
 	private IPackageFragment selectedPackageFragment;
@@ -154,40 +115,13 @@ public class IgnoredTestView extends ViewPart {
 	private IType selectedType;
 	private CandidateRefactoring[] candidateRefactoringTable;
 	private IJavaProject project;
-	final String REFACTORING_DESCRIPTION = " .... ";
-
+	final String REFACTORING_DESCRIPTION = "Remove Method";
 
     private List<TestSmellDescription> testSmells;
     
     public static String getMessageDialogTitle() {
 		return MESSAGE_DIALOG_TITLE;
 	}
-    
-    private String getNumberString(String myText) {
-    	int tam = myText.length();
-    	char[] vetor = myText.toCharArray();   
-    	String novaString = "";
-    	
-    	for (int i = 0; i < tam; i++ ) {    		
-    		if (Character.isDigit(vetor[i]))
-    			novaString += vetor[i]; 	
-    	}
-    	
-    	return novaString;
-    }
-    
-    private String getTextString(String myText) {
-    	int tam = myText.length();
-    	char[] vetor = myText.toCharArray();   
-    	String novaString = "";
-    	
-    	for (int i = 0; i < tam; i++ ) {    		
-    		if (Character.isLetter(vetor[i]))
-    			novaString += vetor[i]; 	
-    	}
-    	
-    	return novaString;
-    }
 
 	class ViewContentProvider implements IStructuredContentProvider {
 		public void inputChanged(Viewer v, Object oldInput, Object newInput) {
@@ -208,16 +142,16 @@ public class IgnoredTestView extends ViewPart {
 			CandidateRefactoring entry = (CandidateRefactoring)obj;
 			switch(index){
 				case 0:
-					if(entry instanceof AddExplanationCandidateRefactoring)
+					if(entry instanceof RemoveMethodCandidateRefactoring)
 						return "Ignored Test";
 					else
 						return "";
 				case 1:
-					return getTextString(entry.getSourceEntity2()) + "( )";
+					return entry.getMethod();
 				case 2:
-					return getNumberString(entry.getSourceEntity2());
+					return String.valueOf(entry.getRange().begin.line);
 				case 3:
-					return String.valueOf(entry.getPosition().offset);
+					return String.valueOf(entry.getRange().end.line);
 				case 4:
 					return entry.getSourceClass().getFilePath();
 					//return "Caminho do arquivo";
@@ -238,8 +172,8 @@ public class IgnoredTestView extends ViewPart {
 	}
 	class NameSorter extends ViewerSorter {
 		public int compare(Viewer viewer, Object obj1, Object obj2) {
-			AddExplanationCandidateRefactoring candidate1 = (AddExplanationCandidateRefactoring)obj1;
-			AddExplanationCandidateRefactoring candidate2 = (AddExplanationCandidateRefactoring)obj2;
+			RemoveMethodCandidateRefactoring candidate1 = (RemoveMethodCandidateRefactoring)obj1;
+			RemoveMethodCandidateRefactoring candidate2 = (RemoveMethodCandidateRefactoring)obj2;
 			return candidate1.compareTo(candidate2);
 		}
 	}
@@ -366,8 +300,8 @@ public class IgnoredTestView extends ViewPart {
 				if(selection instanceof IStructuredSelection) {
 					IStructuredSelection structuredSelection = (IStructuredSelection)selection;
 					Object[] selectedItems = structuredSelection.toArray();
-					if(selection.getFirstElement() instanceof AddExplanationCandidateRefactoring && selectedItems.length == 1) {
-						AddExplanationCandidateRefactoring candidateRefactoring = (AddExplanationCandidateRefactoring)selection.getFirstElement();
+					if(selection.getFirstElement() instanceof RemoveMethodCandidateRefactoring && selectedItems.length == 1) {
+						RemoveMethodCandidateRefactoring candidateRefactoring = (RemoveMethodCandidateRefactoring)selection.getFirstElement();
 						tableViewer.getTable().setMenu(getRightClickMenu(tableViewer, candidateRefactoring));
 					}
 				}
@@ -386,8 +320,8 @@ public class IgnoredTestView extends ViewPart {
 			}
 
 			public Object getValue(Object element, String property) {
-				if(element instanceof AddExplanationCandidateRefactoring) {
-					AddExplanationCandidateRefactoring candidate = (AddExplanationCandidateRefactoring)element;
+				if(element instanceof RemoveMethodCandidateRefactoring) {
+					RemoveMethodCandidateRefactoring candidate = (RemoveMethodCandidateRefactoring)element;
 					if(candidate.getUserRate() != null)
 						return candidate.getUserRate();
 					else
@@ -399,8 +333,8 @@ public class IgnoredTestView extends ViewPart {
 			public void modify(Object element, String property, Object value) {
 				TableItem item = (TableItem)element;
 				Object data = item.getData();
-				if(data instanceof AddExplanationCandidateRefactoring) {
-					AddExplanationCandidateRefactoring candidate = (AddExplanationCandidateRefactoring)data;
+				if(data instanceof RemoveMethodCandidateRefactoring) {
+					RemoveMethodCandidateRefactoring candidate = (RemoveMethodCandidateRefactoring)data;
 					candidate.setUserRate((Integer)value);
 					IPreferenceStore store = Activator.getDefault().getPreferenceStore();
 					boolean allowUsageReporting = store.getBoolean(PreferenceConstants.P_ENABLE_USAGE_REPORTING);
@@ -466,7 +400,7 @@ public class IgnoredTestView extends ViewPart {
 		toolTip.activate();
 	}
 
-	private Menu getRightClickMenu(TableViewer tableViewer, final AddExplanationCandidateRefactoring candidateRefactoring) {
+	private Menu getRightClickMenu(TableViewer tableViewer, final RemoveMethodCandidateRefactoring candidateRefactoring) {
 		Menu popupMenu = new Menu(tableViewer.getControl());
 		MenuItem textualDiffMenuItem = new MenuItem(popupMenu, SWT.NONE);
 		textualDiffMenuItem.setText("Visualize Code Smell");
@@ -570,7 +504,7 @@ public class IgnoredTestView extends ViewPart {
 				if(wasAlreadyOpen)
 					openPackageExplorerViewPart();
 				if (candidateRefactoringTable == null || candidateRefactoringTable.length == 0 ) {
-					JOptionPane.showMessageDialog(null, "Conditional Test Logic not found.");				
+					JOptionPane.showMessageDialog(null, "Ignored Test not found.");				
 				}
 			}
 		};
@@ -597,10 +531,11 @@ public class IgnoredTestView extends ViewPart {
 					ITextEditor sourceEditor = (ITextEditor)JavaUI.openInEditor(sourceJavaElement);
 					ArrayList<Position> positions = new ArrayList<Position>();
 					
-					int num = 0;
-					num = Integer.valueOf(candidate.getLineNumber());
+					Range range = candidate.getRange();
+					Position positionAux = null;
 					try {
-						positions.add(getPositioAssertion(filePath, num));
+						positionAux = getSnippetLength(filePath, range);
+						positions.add(positionAux);
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
@@ -612,16 +547,12 @@ public class IgnoredTestView extends ViewPart {
 							annotationModel.removeAnnotation(currentAnnotation);
 						}
 					}
-					String texto = "Assertion Roulette occurs when a test method has multiple non-documented assertions. If one of the assertions fails, you do not know which one it is. Add Assertion Explanation to remove this smell.";
+					String texto = "Occurs when a test method does not contain executable statements.";
 					for(Position position : positions) {
 						SliceAnnotation annotation = new SliceAnnotation(SliceAnnotation.EXTRACTION, texto);
 						annotationModel.addAnnotation(annotation, position);
 					}
-					Position firstPosition = positions.get(0);
-					Position lastPosition = positions.get(positions.size()-1);
-					int offset = firstPosition.getOffset();
-					int length = lastPosition.getOffset() + lastPosition.getLength() - firstPosition.getOffset();
-					sourceEditor.setHighlightRange(offset, length, true);
+					sourceEditor.setHighlightRange(positionAux.getOffset(), positionAux.getLength(), true);
 				} catch (PartInitException e) {
 					e.printStackTrace();
 				} catch (JavaModelException e) {
@@ -651,11 +582,16 @@ public class IgnoredTestView extends ViewPart {
 					IJavaElement sourceJavaElement = JavaCore.create(sourceFile);
 					ITextEditor sourceEditor = (ITextEditor)JavaUI.openInEditor(sourceJavaElement);
 					ArrayList<Position> positions = new ArrayList<Position>();
+
+					Range range = candidate.getRange();
+					Position positionAux = null;
 					
-					int num = 0;
-					num = Integer.valueOf(candidate.getLineNumber());
+					
+					int line = 0;
+					line = Integer.valueOf(candidate.getLineNumber());
 					try {
-						positions.add(getPositioAssertion(filePath, num));
+						positionAux = getSnippetLength(filePath, range);
+						positions.add(positionAux);
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
@@ -667,48 +603,28 @@ public class IgnoredTestView extends ViewPart {
 							annotationModel.removeAnnotation(currentAnnotation);
 						}
 					}
-					String texto = "Assertion Roulette occurs when a test method has multiple non-documented assertions. If one of the assertions fails, you do not know which one it is. Add Assertion Explanation to remove this smell.";
+					String texto = "Occurs when a test method does not contain executable statements.";
 					for(Position position : positions) {
 						SliceAnnotation annotation = new SliceAnnotation(SliceAnnotation.EXTRACTION, texto);
 						annotationModel.addAnnotation(annotation, position);
 					}
-					Position firstPosition = positions.get(0);
-					Position lastPosition = positions.get(positions.size()-1);
-					int offset = firstPosition.getOffset();
-					int length = lastPosition.getOffset() + lastPosition.getLength() - firstPosition.getOffset();
-					sourceEditor.setHighlightRange(offset, length, true);
-					
+					sourceEditor.setHighlightRange(positionAux.getOffset(), positionAux.getLength(), true);
 					IDocumentProvider docProvider = sourceEditor.getDocumentProvider();
 					IDocument classeDocument = docProvider.getDocument(sourceEditor.getEditorInput());
 					
-					try {
-						String teste = explanationNoEmpty(filePath, num);
-						classeDocument.replace(offset-1, length, teste);
-					} catch (IOException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
+					String emptyString  = "";
+					classeDocument.replace(positionAux.getOffset(),  positionAux.getLength() + 1, emptyString);
 					
 					// Salvar aquivo
 					// Refirecionar para a posicao
 				    final IDocument doc = docProvider.getDocument(sourceEditor.getEditorInput());
 				   	try {
 						docProvider.saveDocument(new NullProgressMonitor(), new FileEditorInput(sourceFile), classeDocument, true);
-						AssertionParenteseLine parentese = getParentesesPosition(filePath, num);
-						String refactoringText = "\"" + REFACTORING_DESCRIPTION +" here" + "\", ";
-						classeDocument.replace(offset-1, parentese.position+1, parentese.textBeforeParentese + refactoringText);
-						docProvider.saveDocument(new NullProgressMonitor(), new FileEditorInput(sourceFile), classeDocument, true);
-					   	doubleClickAction.run();
+//						identifyBadSmellsAction.run();
 				   	} catch (CoreException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
-					}
-				   	
-//				   	IStructuredSelection selection = (IStructuredSelection)tableViewer.getSelection();
-//					CandidateRefactoring candidate = (CandidateRefactoring)selection.getFirstElement();
-				   	
-				   	
-				    
+					}				    
 				} catch (PartInitException e) {
 					e.printStackTrace();
 				} catch (JavaModelException e) {
@@ -724,154 +640,37 @@ public class IgnoredTestView extends ViewPart {
 		applyRefactoringAction.setEnabled(false);
 
 	}
-	public String explanationNoEmpty(String path, int line) throws IOException {
-		int inicio = 0, tamanho = 0, contaLinha, caracteres;
+	
+	//Given a test class and a Range object, this method returns a 
+	//Position object with the range's starting location and length.
+	public Position getSnippetLength(String path, Range range) throws IOException {
+		int offset = 0, length = 0, contLine, characters;
+		int begin = range.begin.line;
+		int end = range.end.line;
 		
-		contaLinha = 1;
-		String conteudoLinha = "";
+		contLine = 1;
+		characters = 0;
+		
 		File file  = new File(path);
-		BufferedReader  leitor = new BufferedReader(new FileReader(file));
+		BufferedReader leitor = new BufferedReader(new FileReader(file));
 		String st;
 		while ((st = leitor.readLine()) != null) {
-			if (contaLinha == line) {
-				conteudoLinha = st; // conteudoLinha é utilizado para remover a explicação vazia
-				break;
+			characters += st.length() +1 ;
+			if (contLine == begin) {
+				length = st.length();
+				offset = (int) (characters - length);
 			}
-			contaLinha++;
-		}
-		
-		/*
-		 *  Remove o comentário vazio
-		 */
-		String strFinal = "";
-			
-		int positionPrimeiraAspa = -1;
-		int positionPrimeiroParentese = -1;
-		int positinioVirgula = -1;		
-		char[] ch = conteudoLinha.toCharArray();  		
-		int quant_espacos = 0;		
-		
-		//esse for tira os espaços
-		for(int j = 0; j < ch.length; j++ ){  		
-			if (ch[j] == ' ') {
-				quant_espacos ++;
-			}
-			else {
-				break;
-			}
-		}		
-		
-		String aux = "";
-		if (quant_espacos > 0) {
-			aux = conteudoLinha.substring(quant_espacos, conteudoLinha.length());
-			conteudoLinha = aux;
-		}
-		
-		//esse for identifica a posicao de cada aspas
-		char[] vetor = conteudoLinha.toCharArray();   
-		for(int i = 0; i < vetor.length; i++ ){ 	
-			if (vetor[i] == '(' && (positionPrimeiroParentese != -1 ))
-				break;
-			else if (vetor[i] == '(' && (positionPrimeiroParentese == -1 )) 
-				positionPrimeiroParentese = i;
-			else if (vetor[i] == '\"' && (positionPrimeiroParentese != -1) && (positionPrimeiraAspa == -1)) 
-				positionPrimeiraAspa = i;
-			else if (vetor[i] == ',' && positionPrimeiraAspa != -1  ) {
-				positinioVirgula = i;
-				break;
-			}
-		}
-		String resultado = "";
-		if (quant_espacos > 0) {
-			for (int k = 0; k < quant_espacos; k++) {
-				resultado += " ";
-			}
-		}
-		
-		if(positionPrimeiraAspa != -1 && positinioVirgula != -1 ) {
-			resultado += conteudoLinha.substring(0, positionPrimeiraAspa);
-			resultado += conteudoLinha.substring(positinioVirgula + 1, conteudoLinha.length());		
-		}
-		else {
-			resultado += conteudoLinha;
-		}
-		return resultado;
-	}
-	
-	
-	class AssertionParenteseLine {
-		
-		int position;
-		String textBeforeParentese;
-		
-		AssertionParenteseLine(int position, String textBeforeParentese) {
-			this.position = position;
-			this.textBeforeParentese = textBeforeParentese;
-		}
-		
-		
-	}
-	
-	public AssertionParenteseLine getParentesesPosition(String path, int line) {
-		int contaLinha;
-		
-		contaLinha = 1;
-		
-		File file  = new File(path);
-		BufferedReader leitor;
-		int parentesePosition = -1;
-		String textBeforeParentese = "";
-		try {
-			leitor = new BufferedReader(new FileReader(file));
-			
-			String st;
-			
-			while ((st = leitor.readLine()) != null) {
-				
-				if (contaLinha == line) {
-					parentesePosition = st.indexOf("(");
-					textBeforeParentese = st.substring(0, parentesePosition + 1);
+			else if (contLine > begin && contLine <= end) {
+				length += st.length() +1;
+				//It only breaks the loop when it reaches the last line
+				if (contLine == end) {
 					break;
 				}
-				contaLinha++;
-			} 
-		
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		
-		
-		return new AssertionParenteseLine(parentesePosition, textBeforeParentese); 
-	}
-	
-	public Position getPositioAssertion(String path, int line) throws IOException {
-		int inicio = 0, tamanho = 0, contaLinha, caracteres;
-		
-		contaLinha = 1;
-		caracteres = 0;
-		
-		File file  = new File(path);
-		BufferedReader  leitor = new BufferedReader(new FileReader(file));
-		String st;
-		while ((st = leitor.readLine()) != null) {
-			caracteres += st.length() +1 ;
-			if (contaLinha == line) {
-				tamanho = st.length();
-				inicio = (int) (caracteres - tamanho);
-				break;
 			}
-			contaLinha++;
+			contLine++;
+			
 		} 		
-		return new Position(inicio, tamanho);
-		
-	}
-	public IFile fileToIfile(File file) {
-		 	 
-		 IFile iFile = ResourcesPlugin.getWorkspace().getRoot().getFile((IPath) file);
-		 return iFile;
-
+		return new Position(offset - 1, length);	
 	}
 
 	private void hookDoubleClickAction() {
@@ -900,7 +699,7 @@ public class IgnoredTestView extends ViewPart {
 		if(candidateRefactoringTable != null) {
 			Set<String> entitySet = candidateRefactoring.getEntitySet();
 			for(CandidateRefactoring candidate : candidateRefactoringTable) {
-				if(candidate instanceof AddExplanationCandidateRefactoring) {
+				if(candidate instanceof RemoveMethodCandidateRefactoring) {
 					if(entitySet.contains(candidate.getSourceEntity())/* && candidateRefactoring.getTarget().equals(candidate.getTarget())*/)
 						moveMethodPrerequisiteRefactorings.add(candidate);
 				}
@@ -963,14 +762,14 @@ public class IgnoredTestView extends ViewPart {
 				MySystem system = new MySystem(systemObject, false);
 				
 				final DistanceMatrix distanceMatrix = new DistanceMatrix(system);
-				final List<AddExplanationCandidateRefactoring> moveMethodCandidateList = new ArrayList<AddExplanationCandidateRefactoring>();
+				final List<RemoveMethodCandidateRefactoring> moveMethodCandidateList = new ArrayList<RemoveMethodCandidateRefactoring>();
 				
 				try {
 					callAssertionRoulette();
 				} catch (IOException e) {
 					e.printStackTrace();
 				}				
-				AddExplanationCandidateRefactoring addExp;
+				RemoveMethodCandidateRefactoring addExp;
 				int n = testSmells.size();
 				for (int i = 0; i< n; i++) {
 					String superClass = testSmells.get(i).getClass().getSuperclass().getName();
@@ -982,14 +781,15 @@ public class IgnoredTestView extends ViewPart {
 							new ClassObject());
 					
 					MyClass minhaOutraClasse = new MyClass(testSmells.get(i).getClassName(), testSmells.get(i).getClassName());
-					MyMethod meuMeuMetodo = new MyMethod(testSmells.get(i).getClassName(), testSmells.get(i).getMethodName() + testSmells.get(i).getLinePositionBegin(), "");
-					Position minhaPosicao = new Position(Integer.valueOf(testSmells.get(i).getLinePositionEnd().toString()), 0);
-					addExp = new AddExplanationCandidateRefactoring(system, minhaClasse, minhaOutraClasse, meuMeuMetodo, testSmells.get(i).getLinePositionBegin(), minhaPosicao );
+					MyMethod meuMeuMetodo = new MyMethod(testSmells.get(i).getClassName(), testSmells.get(i).getMethodName(), "");
+					Position position = new Position(Integer.valueOf(testSmells.get(i).getLinePositionEnd().toString()), 0);
+					Range rangeAux = testSmells.get(i).getRange();
+					addExp = new RemoveMethodCandidateRefactoring(system, minhaClasse, minhaOutraClasse, meuMeuMetodo, testSmells.get(i).getLinePositionBegin(), position, rangeAux);
 					moveMethodCandidateList.add(addExp);
 				}
 				table = new CandidateRefactoring[moveMethodCandidateList.size()];
 				int counter = 0;
-				for(AddExplanationCandidateRefactoring candidate : moveMethodCandidateList) {
+				for(RemoveMethodCandidateRefactoring candidate : moveMethodCandidateList) {
 					table[counter] = candidate;
 					counter++;
 				}

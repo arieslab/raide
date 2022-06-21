@@ -244,16 +244,17 @@ public class MagicNumberTest extends AbstractSmell {
 
 	public void insertTestSmell (Range range, MethodDeclaration testMethod) {
 		cadaTestSmell = new TestSmellDescription("Ignored Test", 
-				 "....", 
-				 getFilePath(), 
-				 getClassName(),
-				 testMethod.getName() + "() \n" ,
-				 range.begin.line + "", 
-				 range.end.line + "", 
-				 range.begin.line, 
-				 range.end.line,
-				 "",
-				 null);	
+												 "....", 
+												 getFilePath(), 
+												 getClassName(),
+												 testMethod.getName() + "() \n" ,
+												 range.begin.line + "", 
+												 range.end.line + "", 
+												 range.begin.line, 
+												 range.end.line,
+												 "",
+												 null,
+												 null);	
 		listTestSmells.add(cadaTestSmell);
 		
 //		String smellLocation;

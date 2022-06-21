@@ -3,6 +3,7 @@ package org.ufba.raide.java.testsmell;
 import org.eclipse.jface.text.Position;
 
 import com.github.javaparser.Range;
+import com.github.javaparser.ast.body.MethodDeclaration;
 
 public class TestSmellDescription {
 	
@@ -11,15 +12,19 @@ public class TestSmellDescription {
 	String filePath;
 	String className;
 	String methodName;
+	// Remove this snippet in the next refactorings
+	// Begin
 	String linePositionBegin;
 	String linePositionEnd;
 	int beginMethod;
 	int endMethod;
+	//End
 	String field;
 	Range range;
-//	Position positionBegin;
-//	Position positionEnd;
+	MethodDeclaration methodTest;
 	
+	// Remove this snippet in the next refactorings
+	// Begin
 	public int getBeginMethod() {
 		return beginMethod;
 	}
@@ -32,25 +37,37 @@ public class TestSmellDescription {
 	public void setEndMethod(int endMethod) {
 		this.endMethod = endMethod;
 	}
-	public TestSmellDescription(String testSmellType, String testSmellRefactoring, String filePath, 
-								String className, String methodName, String linePositionBegin,  
-								String linePositionEnd, int beginMethod, int endMethod, String field,
-								Range range) {
+	//End
+	public TestSmellDescription(String testSmellType, String testSmellRefactoring, 
+								String filePath, String className, String methodName, 
+								// Remove this snippet in the next refactorings
+								// Begin
+								String linePositionBegin, String linePositionEnd, int beginMethod, int endMethod, 
+								//End
+								String field, Range range, MethodDeclaration methodTest) {
 		
 		this.testSmellType = testSmellType;
 		this.testSmellRefactoring = testSmellRefactoring;
 		this.filePath = filePath;
 		this.className = className;
 		this.methodName = methodName;
+		// Remove this snippet in the next refactorings
+		// Begin
 		this.linePositionBegin = linePositionBegin;
 		this.linePositionEnd = linePositionEnd;		
 		this.beginMethod = beginMethod;
 		this.endMethod = endMethod;
+		//End
 		this.field = field;
 		this.range = range;
+		this.methodTest = methodTest;
 	}
 	public TestSmellDescription() {
-		new TestSmellDescription("", "", "", "", "", "", "", 0, 0, "", null);		
+		// Remove this snippet in the next refactorings
+		// Begin
+		new TestSmellDescription("", "", "", "", "", "", "", 0, 0, "", null, null);
+		//End
+		//new TestSmellDescription("", "", "", "", "", "", null);	
 	}	
 	
 	
@@ -84,6 +101,9 @@ public class TestSmellDescription {
 	public void setMethodName(String methodName) {
 		this.methodName = methodName;
 	}
+	
+	// Remove this snippet in the next refactorings
+	// Begin
 	public String getLinePositionBegin() {
 		return linePositionBegin;
 	}
@@ -96,6 +116,7 @@ public class TestSmellDescription {
 	public void setLinePositionEnd(String linePositionEnd) {
 		this.linePositionEnd = linePositionEnd;
 	}
+	//End
 	public Range getRange() {
 		return range;
 	}

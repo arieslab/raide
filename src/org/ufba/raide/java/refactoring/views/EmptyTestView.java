@@ -123,31 +123,31 @@ public class EmptyTestView extends ViewPart {
 		return MESSAGE_DIALOG_TITLE;
 	}
     
-    private String getNumberString(String myText) {
-    	int tam = myText.length();
-    	char[] vetor = myText.toCharArray();   
-    	String novaString = "";
-    	
-    	for (int i = 0; i < tam; i++ ) {    		
-    		if (Character.isDigit(vetor[i]))
-    			novaString += vetor[i]; 	
-    	}
-    	
-    	return novaString;
-    }
+//    private String getNumberString(String myText) {
+//    	int tam = myText.length();
+//    	char[] vetor = myText.toCharArray();   
+//    	String novaString = "";
+//    	
+//    	for (int i = 0; i < tam; i++ ) {    		
+//    		if (Character.isDigit(vetor[i]))
+//    			novaString += vetor[i]; 	
+//    	}
+//    	
+//    	return novaString;
+//    }
     
-    private String getTextString(String myText) {
-    	int tam = myText.length();
-    	char[] vetor = myText.toCharArray();   
-    	String novaString = "";
-    	
-    	for (int i = 0; i < tam; i++ ) {    		
-    		if (Character.isLetter(vetor[i]))
-    			novaString += vetor[i]; 	
-    	}
-    	
-    	return novaString;
-    }
+//    private String getTextString(String myText) {
+//    	int tam = myText.length();
+//    	char[] vetor = myText.toCharArray();   
+//    	String novaString = "";
+//    	
+//    	for (int i = 0; i < tam; i++ ) {    		
+//    		if (Character.isLetter(vetor[i]))
+//    			novaString += vetor[i]; 	
+//    	}
+//    	
+//    	return novaString;
+//    }
 
 	class ViewContentProvider implements IStructuredContentProvider {
 		public void inputChanged(Viewer v, Object oldInput, Object newInput) {
@@ -173,11 +173,11 @@ public class EmptyTestView extends ViewPart {
 					else
 						return "";
 				case 1:
-					return getTextString(entry.getSourceEntity2()) + "( )";
+					return entry.getMethod();
 				case 2:
-					return getNumberString(entry.getSourceEntity2());
+					return String.valueOf(entry.getRange().begin.line);
 				case 3:
-					return String.valueOf(entry.getPosition().offset);
+					return String.valueOf(entry.getRange().end.line);
 				case 4:
 					return entry.getSourceClass().getFilePath();
 					//return "Caminho do arquivo";
@@ -653,7 +653,7 @@ public class EmptyTestView extends ViewPart {
 				    final IDocument doc = docProvider.getDocument(sourceEditor.getEditorInput());
 				   	try {
 						docProvider.saveDocument(new NullProgressMonitor(), new FileEditorInput(sourceFile), classeDocument, true);
-						identifyBadSmellsAction.run();
+//						identifyBadSmellsAction.run();
 				   	} catch (CoreException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -814,7 +814,7 @@ public class EmptyTestView extends ViewPart {
 							new ClassObject());
 					
 					MyClass minhaOutraClasse = new MyClass(testSmells.get(i).getClassName(), testSmells.get(i).getClassName());
-					MyMethod meuMeuMetodo = new MyMethod(testSmells.get(i).getClassName(), testSmells.get(i).getMethodName() + testSmells.get(i).getLinePositionBegin(), "");
+					MyMethod meuMeuMetodo = new MyMethod(testSmells.get(i).getClassName(), testSmells.get(i).getMethodName(), "");
 					Position position = new Position(Integer.valueOf(testSmells.get(i).getLinePositionEnd().toString()), 0);
 					Range rangeAux = testSmells.get(i).getRange();
 					addExp = new RemoveMethodCandidateRefactoring(system, minhaClasse, minhaOutraClasse, meuMeuMetodo, testSmells.get(i).getLinePositionBegin(), position, rangeAux);

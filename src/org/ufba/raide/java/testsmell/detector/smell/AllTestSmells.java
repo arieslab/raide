@@ -213,6 +213,7 @@ public class AllTestSmells extends AbstractSmell {
 															 n.getRange().get().begin.line, 
 															 n.getRange().get().end.line,
 															 "",
+															 null,
 															 null);	
 					listTestSmells.add(cadaTestSmell);
 					String smellLocation;

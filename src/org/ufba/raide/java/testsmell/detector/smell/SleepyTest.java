@@ -176,6 +176,7 @@ public class SleepyTest extends AbstractSmell {
 				 range.begin.line, 
 				 range.end.line,
 				 "",
+				 null,
 				 null);	
 		listTestSmells.add(cadaTestSmell);
 		

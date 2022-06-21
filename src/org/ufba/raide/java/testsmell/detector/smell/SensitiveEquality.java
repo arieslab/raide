@@ -192,6 +192,7 @@ public class SensitiveEquality extends AbstractSmell {
 				 range.begin.line, 
 				 range.end.line,
 				 "",
+				 null,
 				 null);	
 		listTestSmells.add(cadaTestSmell);
 		

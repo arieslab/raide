@@ -42,6 +42,7 @@ public class AddExplanationCandidateRefactoring extends CandidateRefactoring imp
 	private MyClass sourceClass;
     private MyClass targetClass;
     private MyMethod sourceMethod;
+    private String methodName;
     private Map<MethodInvocation, MethodDeclaration> additionalMethodsToBeMoved;
     private String movedMethodName;
     private AssertionRouletteVisualizationData visualizationData;
@@ -49,6 +50,7 @@ public class AddExplanationCandidateRefactoring extends CandidateRefactoring imp
     private String lineNumber;
     private Position position;
     private String field;
+    private Range range;
     
     public String getLineNumber() {
 		return lineNumber;
@@ -67,16 +69,17 @@ public class AddExplanationCandidateRefactoring extends CandidateRefactoring imp
 		
 	}
 
-    public AddExplanationCandidateRefactoring(MySystem system, MyClass sourceClass, MyClass targetClass, MyMethod sourceMethod, Position targetPosition) {
+    public AddExplanationCandidateRefactoring(MySystem system, MyClass sourceClass, MyClass targetClass, MyMethod sourceMethod, Position targetPosition,  Range range) {
   
         this.system = system;
     	this.sourceClass = sourceClass;
         this.targetClass = targetClass;
         this.sourceMethod = sourceMethod;
+        this.methodName = sourceMethod.getMethodName();
         this.additionalMethodsToBeMoved = new LinkedHashMap<MethodInvocation, MethodDeclaration>();
         this.movedMethodName = sourceMethod.getMethodName();
-        this.lineNumber = lineNumber;
         this.position = targetPosition;
+        this.range = range;
         
         List<MethodInvocationObject> methodInvocations = sourceMethod.getMethodObject().getMethodInvocations();
         for(MethodInvocationObject methodInvocation : methodInvocations) {
@@ -504,7 +507,7 @@ public class AddExplanationCandidateRefactoring extends CandidateRefactoring imp
 	}
 	@Override
 	public String getMethod() {
-		return null;
+		return methodName;
 	}
 	@Override
 	public String getField() {
@@ -513,7 +516,7 @@ public class AddExplanationCandidateRefactoring extends CandidateRefactoring imp
 	@Override
 	public Range getRange() {
 		// TODO Auto-generated method stub
-		return null;
+		return range;
 	}
 	
 	

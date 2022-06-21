@@ -1,6 +1,7 @@
 package org.ufba.raide.java.testsmell.detector.smell;
 
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
@@ -204,6 +205,9 @@ public class AssertionRoulette extends AbstractSmell {
 					// JOptionPane.showMessageDialog(null, "O método " +
 					// this.testMethod.getElementName() + "() apresenta smell");
 					
+//					MethodDeclaration methodAux = null;
+//					methodAux = new MethodDeclaration();
+					
 					cadaTestSmell = new TestSmellDescription("Assertion Roulette", 
 															 "Assertion Explanation", 
 															 getFilePath(), getClassName(),
@@ -213,11 +217,12 @@ public class AssertionRoulette extends AbstractSmell {
 															 n.getRange().get().begin.line, 
 															 n.getRange().get().end.line,
 															 "",
+															 n.getRange().get(),
 															 null);	
 					listTestSmells.add(cadaTestSmell);
 					String smellLocation;
 					smellLocation = "Classe " + getClassName() + "\n" +
-							        "Método " + this.testMethod.getElementName() + "() \n" +
+							        "Metodo " + this.testMethod.getElementName() + "() \n" +
 							        "Linha " + n.getRange().get().begin.line;
 					//JOptionPane.showMessageDialog(null, smellLocation);
 					
