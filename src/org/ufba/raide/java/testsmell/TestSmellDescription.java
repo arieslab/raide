@@ -1,5 +1,9 @@
 package org.ufba.raide.java.testsmell;
 
+import org.eclipse.jface.text.Position;
+
+import com.github.javaparser.Range;
+
 public class TestSmellDescription {
 	
 	String testSmellType;
@@ -12,6 +16,9 @@ public class TestSmellDescription {
 	int beginMethod;
 	int endMethod;
 	String field;
+	Range range;
+//	Position positionBegin;
+//	Position positionEnd;
 	
 	public int getBeginMethod() {
 		return beginMethod;
@@ -26,7 +33,9 @@ public class TestSmellDescription {
 		this.endMethod = endMethod;
 	}
 	public TestSmellDescription(String testSmellType, String testSmellRefactoring, String filePath, 
-			String className, String methodName, String linePositionBegin,  String linePositionEnd, int beginMethod, int endMethod, String field) {
+								String className, String methodName, String linePositionBegin,  
+								String linePositionEnd, int beginMethod, int endMethod, String field,
+								Range range) {
 		
 		this.testSmellType = testSmellType;
 		this.testSmellRefactoring = testSmellRefactoring;
@@ -38,9 +47,10 @@ public class TestSmellDescription {
 		this.beginMethod = beginMethod;
 		this.endMethod = endMethod;
 		this.field = field;
+		this.range = range;
 	}
 	public TestSmellDescription() {
-		new TestSmellDescription("", "", "", "", "", "", "", 0, 0, "");		
+		new TestSmellDescription("", "", "", "", "", "", "", 0, 0, "", null);		
 	}	
 	
 	
@@ -86,7 +96,12 @@ public class TestSmellDescription {
 	public void setLinePositionEnd(String linePositionEnd) {
 		this.linePositionEnd = linePositionEnd;
 	}
-	
+	public Range getRange() {
+		return range;
+	}
+	public void setRange(Range range) {
+		this.range = range;
+	}
 	public String getField() {
 		return field;
 	}

@@ -1,43 +1,85 @@
 package org.ufba.raide.java.distance;
 
+
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import javax.swing.JOptionPane;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jface.text.Position;
+import org.ufba.raide.java.ast.ClassObject;
 import org.ufba.raide.java.ast.FieldInstructionObject;
 import org.ufba.raide.java.ast.MethodInvocationObject;
 import org.ufba.raide.java.ast.MethodObject;
 import org.ufba.raide.java.ast.TypeObject;
 import org.ufba.raide.java.ast.decomposition.cfg.PlainVariable;
+import org.ufba.raide.java.ast.visualization.AssertionRouletteVisualizationData;
 import org.ufba.raide.java.ast.visualization.FeatureEnvyVisualizationData;
+import org.ufba.raide.java.refactoring.views.DuplicateAssertView;
+import org.ufba.raide.java.testsmell.AbstractSmell;
+import org.ufba.raide.java.testsmell.ResultsWriter;
+import org.ufba.raide.java.testsmell.TestFile;
+import org.ufba.raide.java.testsmell.TestSmellDetector;
 
 import com.github.javaparser.Range;
 
-public class MoveMethodCandidateRefactoring extends CandidateRefactoring implements Comparable<MoveMethodCandidateRefactoring> {
+public class RemoveMethodCandidateRefactoring extends CandidateRefactoring implements Comparable<RemoveMethodCandidateRefactoring> {
     private MySystem system;
 	private MyClass sourceClass;
     private MyClass targetClass;
     private MyMethod sourceMethod;
-    //contains source class methods that do not access any field or method and are accessed only by sourceMethod
     private Map<MethodInvocation, MethodDeclaration> additionalMethodsToBeMoved;
     private String movedMethodName;
-    private FeatureEnvyVisualizationData visualizationData;
+    private AssertionRouletteVisualizationData visualizationData;
     private Integer userRate;
+    private String lineNumber;
+    private Position position;
+    private String field;
+    private Range range;
+    
+    public String getLineNumber() {
+		return lineNumber;
+	}
+	public void setLineNumber(String lineNumber) {
+		this.lineNumber = lineNumber;
+	}
+	
+	@Override
+	public Position getPosition() {
+		return position;
+	}
+	@Override
+	public void setPosition(int line, int column) {
+		// TODO Auto-generated method stub
+		
+	}
 
-    public MoveMethodCandidateRefactoring(MySystem system, MyClass sourceClass, MyClass targetClass, MyMethod sourceMethod) {
+    public RemoveMethodCandidateRefactoring(MySystem system, MyClass sourceClass, MyClass targetClass, MyMethod sourceMethod, Position targetPosition, Range range) {
+  
         this.system = system;
     	this.sourceClass = sourceClass;
         this.targetClass = targetClass;
         this.sourceMethod = sourceMethod;
         this.additionalMethodsToBeMoved = new LinkedHashMap<MethodInvocation, MethodDeclaration>();
         this.movedMethodName = sourceMethod.getMethodName();
+        this.lineNumber = lineNumber;
+        this.position = targetPosition;
+        this.range = range;
+        
         List<MethodInvocationObject> methodInvocations = sourceMethod.getMethodObject().getMethodInvocations();
         for(MethodInvocationObject methodInvocation : methodInvocations) {
         	if(methodInvocation.getOriginClassName().equals(sourceClass.getClassObject().getName()) &&
@@ -63,9 +105,101 @@ public class MoveMethodCandidateRefactoring extends CandidateRefactoring impleme
         			additionalMethodsToBeMoved.put(methodInvocation.getMethodInvocation(), invokedMethod.getMethodDeclaration());
         	}
         }
-        this.visualizationData = new FeatureEnvyVisualizationData(sourceClass.getClassObject(),
+        this.visualizationData = new AssertionRouletteVisualizationData(sourceClass.getClassObject(),
 				sourceMethod.getMethodObject(), targetClass.getClassObject());
     }
+    public RemoveMethodCandidateRefactoring(MySystem system, MyClass sourceClass, MyClass targetClass, MyMethod sourceMethod, String lineNumber, Position targetPosition, Range range) {
+    	
+        this.system = system;
+    	this.sourceClass = sourceClass;
+        this.targetClass = targetClass;
+        this.sourceMethod = sourceMethod;
+        this.additionalMethodsToBeMoved = new LinkedHashMap<MethodInvocation, MethodDeclaration>();
+        this.movedMethodName = sourceMethod.getMethodName();
+        this.lineNumber = lineNumber;
+        this.visualizationData = new AssertionRouletteVisualizationData(new ClassObject(), new MethodObject(null), new ClassObject());
+        this.position = targetPosition;
+        this.range = range;
+        
+    }
+    private List<MyTestSmells> callAssertionRoulette() throws IOException{
+    	List<MyTestSmells> listaTestSmells = new ArrayList<MyTestSmells>();
+    	listaTestSmells = new ArrayList<MyTestSmells>();
+    	
+    	MyTestSmells meuTestSmell = null;
+		TestSmellDetector testSmellDetector = TestSmellDetector.createTestSmellDetector(DuplicateAssertView.getMessageDialogTitle());
+        BufferedReader in = null;
+		try {
+			in = new BufferedReader(new FileReader("sample-test.csv"));
+		} catch (FileNotFoundException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+        String str;
+
+        String[] lineItem;
+        TestFile testFile;
+        List<TestFile> testFiles = new ArrayList<>();
+        while ((str = in.readLine()) != null) {
+            lineItem = str.split(",");
+            if(lineItem.length ==2){
+                testFile = new TestFile(lineItem[0], lineItem[1], "");
+            }
+            else{
+                testFile = new TestFile(lineItem[0], lineItem[1], lineItem[2]);
+            }
+            testFiles.add(testFile);
+        }
+        ResultsWriter resultsWriter = ResultsWriter.createResultsWriter();
+        List<String> columnNames;
+        List<String> columnValues;
+
+        columnNames = testSmellDetector.getTestSmellNames();
+        columnNames.add(0, "App");
+        columnNames.add(1, "Version");
+        columnNames.add(2, "TestFilePath");
+        columnNames.add(3, "ProductionFilePath");
+        columnNames.add(4, "RelativeTestFilePath");
+        columnNames.add(5, "RelativeProductionFilePath");
+
+        resultsWriter.writeColumnName(columnNames);
+        TestFile tempFile;
+        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        Date date;
+        for (TestFile file : testFiles) {
+            date = new Date();
+            System.out.println(dateFormat.format(date) + " Processing: "+file.getTestFilePath());
+            System.out.println("Processing: "+file.getTestFilePath());
+
+            //detect smells
+            tempFile = testSmellDetector.detectSmells(file, DuplicateAssertView.getMessageDialogTitle());
+
+            //write output
+            columnValues = new ArrayList<>();
+            columnValues.add(file.getApp());
+            columnValues.add(file.getTagName());
+            columnValues.add(file.getTestFilePath());
+            columnValues.add(file.getProductionFilePath());
+            columnValues.add(file.getRelativeTestFilePath());
+            columnValues.add(file.getRelativeProductionFilePath());
+            for (AbstractSmell smell : tempFile.getTestSmells()) {
+                try {
+                    
+                	JOptionPane.showMessageDialog(null, file.toString());
+                	columnValues.add(String.valueOf(smell.getCountSmell(file.toString())));
+                }
+                catch (NullPointerException e){
+                    columnValues.add("");
+                }
+            }
+            resultsWriter.writeLine(columnValues);
+        }
+
+        System.out.println("end");
+        
+		return listaTestSmells;
+	}
+    //joda
 
     public boolean isApplicable() {
     	if(!isSynchronized() && !containsSuperMethodInvocation() && !overridesMethod() && !containsFieldAssignment() && !isTargetClassAnInterface() &&
@@ -110,7 +244,10 @@ public class MoveMethodCandidateRefactoring extends CandidateRefactoring impleme
     	return sourceClass.getClassObject().containsMethodWithTestAnnotation() || sourceClass.getClassObject().extendsTestCase();
     }
 
-    private boolean isTargetClassAnInterface() {
+    public void setSourceClass(MyClass sourceClass) {
+		this.sourceClass = sourceClass;
+	}
+	private boolean isTargetClassAnInterface() {
     	if(targetClass.getClassObject().isInterface()) {
     		//System.out.println(this.toString() + "\tTarget class is an interface");
     		return true;
@@ -258,14 +395,14 @@ public class MoveMethodCandidateRefactoring extends CandidateRefactoring impleme
 	public String toString() {
         return getSourceEntity() + "->" + getTarget();
     }
-
 	public String getSourceEntity() {
 		StringBuilder sb = new StringBuilder();
         sb.append(sourceMethod.getClassOrigin()).append("::");
         sb.append(movedMethodName);
         List<String> parameterList = sourceMethod.getParameterList();
         sb.append("(");
-        if(!parameterList.isEmpty()) {
+       
+        if(parameterList!=null && !parameterList.isEmpty()) {
             for(int i=0; i<parameterList.size()-1; i++)
                 sb.append(parameterList.get(i)).append(", ");
             sb.append(parameterList.get(parameterList.size()-1));
@@ -275,6 +412,17 @@ public class MoveMethodCandidateRefactoring extends CandidateRefactoring impleme
             sb.append(":").append(sourceMethod.getReturnType());
         return sb.toString();
 	}
+	
+
+	public String getSourceEntity2() {
+		StringBuilder sb = new StringBuilder();
+        sb.append(movedMethodName);
+        List<String> parameterList = sourceMethod.getParameterList();        
+        if(sourceMethod.getReturnType() != null)
+            sb.append(":").append(sourceMethod.getReturnType());
+        return sb.toString();
+	}
+
 
 	public String getSource() {
 		return sourceClass.getName();
@@ -299,7 +447,7 @@ public class MoveMethodCandidateRefactoring extends CandidateRefactoring impleme
 		return visualizationData.toString();
 	}
 
-	public FeatureEnvyVisualizationData getFeatureEnvyVisualizationData() {
+	public AssertionRouletteVisualizationData getFeatureEnvyVisualizationData() {
 		return visualizationData;
 	}
 
@@ -321,8 +469,13 @@ public class MoveMethodCandidateRefactoring extends CandidateRefactoring impleme
 	public void setUserRate(Integer userRate) {
 		this.userRate = userRate;
 	}
+	@Override
+	public Range getRange() {
+		// TODO Auto-generated method stub
+		return range;
+	}
 
-	public int compareTo(MoveMethodCandidateRefactoring other) {
+	public int compareTo(RemoveMethodCandidateRefactoring other) {
 		int thisSourceClassDependencies = this.getDistinctSourceDependencies();
 		int otherSourceClassDependencies = other.getDistinctSourceDependencies();
 		if(thisSourceClassDependencies != otherSourceClassDependencies) {
@@ -347,19 +500,6 @@ public class MoveMethodCandidateRefactoring extends CandidateRefactoring impleme
 	public int getDistinctTargetDependencies() {
 		return getFeatureEnvyVisualizationData().getDistinctTargetDependencies();
 	}
-
-	@Override
-	public String getSourceEntity2() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public String getLineNumber() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 	@Override
 	public int getBeginMethod() {
 		// TODO Auto-generated method stub
@@ -371,34 +511,17 @@ public class MoveMethodCandidateRefactoring extends CandidateRefactoring impleme
 		// TODO Auto-generated method stub
 		return (Integer) null;
 	}
-
 	@Override
 	public String getMethod() {
-		//return sourceMethod.toString();
-		return sourceMethod.getMethodName();
-	}
-
-	@Override
-	public Position getPosition() {
-		// TODO Auto-generated method stub
 		return null;
-	}
-
-	@Override
-	public void setPosition(int line, int column) {
-		// TODO Auto-generated method stub
-		
 	}
 	@Override
 	public String getField() {
-		// TODO Auto-generated method stub
-		return null;
+		return "";
 	}
-
-	@Override
-	public Range getRange() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+	
+	
+	
+	
 	
 }

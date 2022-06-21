@@ -20,6 +20,8 @@ import org.ufba.raide.java.ast.TypeObject;
 import org.ufba.raide.java.ast.util.TopicFinder;
 import org.ufba.raide.java.ast.visualization.GodClassVisualizationData;
 
+import com.github.javaparser.Range;
+
 public class ExtractClassCandidateRefactoring extends CandidateRefactoring implements Comparable<ExtractClassCandidateRefactoring> {
 
 	private MySystem system;
@@ -413,6 +415,12 @@ public class ExtractClassCandidateRefactoring extends CandidateRefactoring imple
 	}
 	@Override
 	public String getField() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Range getRange() {
 		// TODO Auto-generated method stub
 		return null;
 	}

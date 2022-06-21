@@ -18,7 +18,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.draw2d,
  org.eclipse.core.filebuffers,
  org.eclipse.ui.ide,
- org.eclipse.jdt;bundle-version="3.18.0"
+ org.eclipse.jdt;bundle-version="3.18.0",
+ org.eclipse.swt
 Bundle-ActivationPolicy: lazy
 Import-Package: org.eclipse.jdt.core.refactoring
 Export-Package: org.ufba.raide.java.ast,

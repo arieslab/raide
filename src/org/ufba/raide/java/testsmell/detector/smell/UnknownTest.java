@@ -177,7 +177,8 @@ public class UnknownTest extends AbstractSmell {
 				 								 range.end.line + "", 
 				 								 range.begin.line, 
 				 								 range.end.line,
-												 "");	
+												 "",
+												 null);	
 		listTestSmells.add(cadaTestSmell);
 //		String smellLocation;
 //		smellLocation = "Classe " + getClassName() + "\n" + 

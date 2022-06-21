@@ -198,7 +198,8 @@ public class RedundantAssertion extends AbstractSmell {
 				 range.end.line + "", 
 				 range.begin.line, 
 				 range.end.line,
-				 "");	
+				 "",
+				 null);	
 		listTestSmells.add(cadaTestSmell);
 		
 		String smellLocation;

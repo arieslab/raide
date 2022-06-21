@@ -35,6 +35,8 @@ import org.ufba.raide.java.testsmell.ResultsWriter;
 import org.ufba.raide.java.testsmell.TestFile;
 import org.ufba.raide.java.testsmell.TestSmellDetector;
 
+import com.github.javaparser.Range;
+
 public class AddExplanationCandidateRefactoring extends CandidateRefactoring implements Comparable<AddExplanationCandidateRefactoring> {
     private MySystem system;
 	private MyClass sourceClass;
@@ -507,6 +509,11 @@ public class AddExplanationCandidateRefactoring extends CandidateRefactoring imp
 	@Override
 	public String getField() {
 		return "";
+	}
+	@Override
+	public Range getRange() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 	

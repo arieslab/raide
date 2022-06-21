@@ -165,7 +165,8 @@ public class DuplicateAssert extends AbstractSmell {
 		                											 lines + "", 
 		                											 n.getRange().get().begin.line, 
 		                											 n.getRange().get().end.line,
-																	 "");	
+																	 "",
+																	 null);	
 		                	listTestSmells.add(cadaTestSmell);
 	                	}     
                 	}

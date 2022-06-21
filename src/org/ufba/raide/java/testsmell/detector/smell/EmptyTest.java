@@ -22,6 +22,7 @@ import java.util.List;
 
 import javax.swing.JOptionPane;
 
+import org.eclipse.jface.text.Position;
 import org.ufba.raide.java.refactoring.views.*;
 import org.ufba.raide.java.testsmell.AbstractSmell;
 import org.ufba.raide.java.testsmell.SmellyElement;
@@ -126,7 +127,7 @@ public class EmptyTest extends AbstractSmell {
                         //get the total number of statements contained in the method
                         if (n.getBody().get().getStatements().size() == 0) {
 //                            instanceEmpty.add(new MethodUsage(n.getNameAsString(),"",n.getRange().get().begin.line + "-" + n.getRange().get().end.line));
-                        	insertTestSmell(n.getRange().get(), n);
+                        	insertTestSmell(n);
                             return;
                         }
                     }
@@ -135,23 +136,24 @@ public class EmptyTest extends AbstractSmell {
 		}
 
 	}
-	public void insertTestSmell (Range range, MethodDeclaration testMethod) {
+	public void insertTestSmell (MethodDeclaration testMethod) {
 		cadaTestSmell = new TestSmellDescription("Empty Test", 
-												 "Refactoring ...", 
+												 "Remove Method", 
 				 								 getFilePath(), 
 				 								 getClassName(),
 				 								 testMethod.getName() + "() \n" ,
-				 								 range.begin.line + "", 
-				 								 range.end.line + "", 
-				 								 range.begin.line, 
-				 								 range.end.line,
-												 "");	
+				 								 testMethod.getRange().get().begin.line + "", 
+				 								 testMethod.getRange().get().end.line + "", 
+				 								 testMethod.getRange().get().begin.line, 
+				 								 testMethod.getRange().get().end.line,
+												 "",
+												 testMethod.getRange().get());	
 		listTestSmells.add(cadaTestSmell);
 		String smellLocation;
 		smellLocation = "Classe " + getClassName() + "\n" + 
 						"Método " + testMethod.getName() + "() \n" + 
-						"Begin " + range.begin.line + "\n" +
-						"End " + range.end.line;
+						"Begin " + testMethod.getRange().get().begin.line + "\n" +
+						"End " + testMethod.getRange().get().end.line;
 		System.out.println(smellLocation);
 	}
 	

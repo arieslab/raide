@@ -212,7 +212,8 @@ public class AllTestSmells extends AbstractSmell {
 															 n.getRange().get().begin.line + "", 
 															 n.getRange().get().begin.line, 
 															 n.getRange().get().end.line,
-															 "");	
+															 "",
+															 null);	
 					listTestSmells.add(cadaTestSmell);
 					String smellLocation;
 					smellLocation = "Classe " + getClassName() + "\n" +
