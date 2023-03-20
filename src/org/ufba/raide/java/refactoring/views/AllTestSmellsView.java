@@ -17,9 +17,12 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jgit.api.BlameCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.blame.BlameResult;
+import org.eclipse.jgit.diff.RawTextComparator;
+import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
@@ -88,48 +91,47 @@ public class AllTestSmellsView extends ViewPart {
 		try {
 			final List<String> testSmellsTypes = new ArrayList<>();
 			testSmellsTypes.add(AssertionRouletteView.getMessageDialogTitle());
-//			testSmellsTypes.add(ConditionalTestLogicView.getMessageDialogTitle());
-//			testSmellsTypes.add(ConstructionInstallationView.getMessageDialogTitle());
-//			testSmellsTypes.add(DefaultTestView.getMessageDialogTitle());
-//			testSmellsTypes.add(DuplicateAssertView.getMessageDialogTitle());
-//			testSmellsTypes.add(EagerTestView.getMessageDialogTitle());
-//			testSmellsTypes.add(EmptyTestView.getMessageDialogTitle());
-//			testSmellsTypes.add(ExceptionCatchingThrowingView.getMessageDialogTitle());
-//			testSmellsTypes.add(GeneralFixtureView.getMessageDialogTitle());
-//			testSmellsTypes.add(IgnoredTestView.getMessageDialogTitle());
-//			testSmellsTypes.add(LazyTestView.getMessageDialogTitle());
-//			testSmellsTypes.add(MagicNumberTestView.getMessageDialogTitle());
-//			testSmellsTypes.add(MysteryGuestView.getMessageDialogTitle());
-//			testSmellsTypes.add(PrintStatementView.getMessageDialogTitle());
-//			testSmellsTypes.add(RedundantAssertionView.getMessageDialogTitle());
-//			testSmellsTypes.add(ResourceOptimismView.getMessageDialogTitle());
-//			testSmellsTypes.add(SensitiveEqualityView.getMessageDialogTitle());
-//			testSmellsTypes.add(SleepyTestView.getMessageDialogTitle());
-//			testSmellsTypes.add(UnknownTestView.getMessageDialogTitle());
-//			testSmellsTypes.add(VerboseTestView.getMessageDialogTitle());
-			
+			testSmellsTypes.add(ConditionalTestLogicView.getMessageDialogTitle());
+			testSmellsTypes.add(ConstructionInstallationView.getMessageDialogTitle());
+			testSmellsTypes.add(DefaultTestView.getMessageDialogTitle());
+			testSmellsTypes.add(DuplicateAssertView.getMessageDialogTitle());
+			testSmellsTypes.add(EagerTestView.getMessageDialogTitle());
+			testSmellsTypes.add(EmptyTestView.getMessageDialogTitle());
+			testSmellsTypes.add(ExceptionCatchingThrowingView.getMessageDialogTitle());
+			testSmellsTypes.add(GeneralFixtureView.getMessageDialogTitle());
+			testSmellsTypes.add(IgnoredTestView.getMessageDialogTitle());
+			testSmellsTypes.add(LazyTestView.getMessageDialogTitle());
+			testSmellsTypes.add(MagicNumberTestView.getMessageDialogTitle());
+			testSmellsTypes.add(MysteryGuestView.getMessageDialogTitle());
+			testSmellsTypes.add(PrintStatementView.getMessageDialogTitle());
+			testSmellsTypes.add(RedundantAssertionView.getMessageDialogTitle());
+			testSmellsTypes.add(ResourceOptimismView.getMessageDialogTitle());
+			testSmellsTypes.add(SensitiveEqualityView.getMessageDialogTitle());
+			testSmellsTypes.add(SleepyTestView.getMessageDialogTitle());
+			testSmellsTypes.add(UnknownTestView.getMessageDialogTitle());
+			testSmellsTypes.add(VerboseTestView.getMessageDialogTitle());
 
-		
 			List<TestFile> projectTestFiles = getProjectTestFiles();
 			File results = new File(resultsCsvFile);
 			FileOutputStream fos = new FileOutputStream(results);
 			String csvHeader = "Test Smell;Test Method;File Path;Begin;End;Commit Begin;Commit End\n";
 			fos.write(csvHeader.getBytes());
+
+			GitHelper gitHelper = new GitHelper("C:\\Users\\raila\\Documents\\Workspace\\maven-dependency-plugin".replace("\\", "/"));
+
 			for (String testSmellType : testSmellsTypes) {
 				List<TestSmellDescription> testSmells = detectTestSmellByType(testSmellType, projectTestFiles);
 				for (TestSmellDescription smellDetected : testSmells) {
 					String log = smellDetected.getTestSmellType() + ";" + smellDetected.getFilePath() + ";"
-							+ smellDetected.getMethodName().replaceAll("\n", "") + ";"
-							+ smellDetected.getLinePositionBegin() + ";"
-							+ smellDetected.getLinePositionEnd() + ";";
-					
+							+ smellDetected.getMethodName().replaceAll("\n", "").trim() + ";"
+							+ smellDetected.getLinePositionBegin() + ";" + smellDetected.getLinePositionEnd() + ";";
+
 					try {
-						GitHelper git = new GitHelper(
-								smellDetected.getFilePath(), 
-								smellDetected.getLinePositionBegin(), 
-								smellDetected.getLinePositionEnd());
-						
-						log += git.getCommitHashes() + "\n";
+
+						String gitResult = gitHelper.getCommitHashes(smellDetected.getFilePath(),
+								smellDetected.getLinePositionBegin(), smellDetected.getLinePositionEnd());
+
+						log += gitResult + "\n";
 					} catch (GitAPIException e) {
 						e.printStackTrace();
 					}
@@ -252,43 +254,47 @@ public class AllTestSmellsView extends ViewPart {
 		getSite().getWorkbenchWindow().getSelectionService().addSelectionListener(selectionListener);
 		JavaCore.addElementChangedListener(ElementChangedListener.getInstance());
 	}
-	
+
 	class GitHelper {
-		
-		final String testFilePath;
-		final String beginLine;
-		final String endLine;
-	
+
+		private Git git;
 		private BlameResult blameResult;
-		
-		public GitHelper(String testFilePath, String beginLine, String endLine) throws IOException, GitAPIException {
-			this.testFilePath = testFilePath;
-			this.beginLine = beginLine;
-			this.endLine = endLine;
-		
-			this.blameResult = Git.open(new File(testFilePath)).blame().call();
+		private String projectPath;
+
+		public GitHelper(String projectPath) throws IOException {
+			this.projectPath = projectPath;
+			this.git = Git.open(new File(projectPath));
 		}
-		
-		public String getCommitHashes() {
-			String[] beginLines = {beginLine};
-			String[] endLines = {endLine};
-			
+
+		public String getCommitHashes(String testFilePath, String beginLine, String endLine) throws GitAPIException {
+			String projectDir = projectPath.substring(projectPath.lastIndexOf("/"));
+			String filePath = testFilePath.replace("\\", "/").split(projectDir)[1].substring(1);
+
+			System.out.println("RUNNING GIT FOR " + filePath);
+
+			BlameCommand blameCommand = new BlameCommand(git.getRepository()).setFilePath(filePath);
+			this.blameResult = blameCommand.call();
+
+			String[] beginLines = { beginLine };
+			String[] endLines = { endLine };
+
 			if (beginLine.contains(",")) {
 				beginLines = beginLine.trim().split(",");
 			}
-			
+
 			if (endLine.contains(",")) {
 				endLines = endLine.trim().split(",");
 			}
-			
-			return getCommitFromLines(beginLines) + ";" + getCommitFromLines(endLines);
-			
+
+			String result = getCommitFromLines(beginLines) + ";" + getCommitFromLines(endLines);
+			return result;
 		}
-		
+
 		private String getCommitFromLines(String[] lines) {
 			String commitHashes = "";
 			for (int i = 0; i < lines.length; i++) {
-				String hash = blameResult.getSourceCommit(Integer.valueOf(beginLine)).getName();
+				RevCommit commit = blameResult.getSourceCommit(Integer.valueOf(lines[i]) - 1);
+				String hash = commit.getName();
 				if (!commitHashes.isEmpty()) {
 					commitHashes += "," + hash;
 				} else {
@@ -297,7 +303,6 @@ public class AllTestSmellsView extends ViewPart {
 			}
 			return commitHashes;
 		}
-		
-		
+
 	}
 }
