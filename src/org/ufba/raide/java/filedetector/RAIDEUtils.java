@@ -98,6 +98,12 @@ public final class RAIDEUtils {
 		return new String(Base64.decode(content));
 	}
 	
+	public static String extractOnlySourceDir(String projectPath, String testFilePath) {
+		String projectDir = projectPath.substring(projectPath.lastIndexOf("/")).replace("/", "").replace("\\","");
+		String filePath = testFilePath.split(projectDir)[1].substring(1);
+		return filePath;
+	}
+	
 	public static void main(String[] args) throws IOException {
 //		String c = RAIDEUtils.copyMethodContent("C:\\Users\\raila\\Documents\\Workspace\\maven-dependency-plugin_3.3.0\\src\\test\\java\\org\\apache\\maven\\plugins\\dependency\\utils\\TestDependencyUtil.java", new ArrayList<Integer>(Arrays.asList(301,304)), new ArrayList<Integer>(Arrays.asList(301,304)));
 //		System.out.println(RAIDEUtils.encode(c));

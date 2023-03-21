@@ -131,7 +131,7 @@ public class AllTestSmellsView extends ViewPart {
 			for (String testSmellType : testSmellsTypes) {
 				List<TestSmellDescription> testSmells = detectTestSmellByType(testSmellType, projectTestFiles);
 				for (TestSmellDescription smellDetected : testSmells) {
-					String log = smellDetected.getTestSmellType() + ";" + smellDetected.getFilePath() + ";"
+					String log = smellDetected.getTestSmellType() + ";" + RAIDEUtils.extractOnlySourceDir(getSrcProject(), smellDetected.getFilePath()) + ";"
 							+ smellDetected.getMethodName().replaceAll("\n", "").trim() + ";"
 							+ smellDetected.getLinePositionBegin() + ";" + smellDetected.getLinePositionEnd() + ";";
 
