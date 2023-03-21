@@ -356,7 +356,7 @@ public class EagerTest extends AbstractSmell {
         }
     }
 	public void insertTestSmell (Range range, MethodDeclaration testMethod, String calledMethodsName) {
-		cadaTestSmell = new TestSmellDescription("Ignored Test", 
+		cadaTestSmell = new TestSmellDescription(getSmellName(), 
 												 "....", 
 				 								 getFilePath(), 
 				 								 getClassName(),

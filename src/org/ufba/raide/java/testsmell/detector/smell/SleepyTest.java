@@ -166,7 +166,7 @@ public class SleepyTest extends AbstractSmell {
 //		insertTestSmell(n.getRange().get(), this.testMethod);
 
 	public void insertTestSmell (Range range, MethodDeclaration testMethod) {
-		cadaTestSmell = new TestSmellDescription("Ignored Test", 
+		cadaTestSmell = new TestSmellDescription(getSmellName(), 
 				 "....", 
 				 getFilePath(), 
 				 getClassName(),

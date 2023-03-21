@@ -70,7 +70,7 @@ public class ResourceOptimism extends AbstractSmell {
 	}
 	@Override
 	public String getSmellName() {
-		return "Mystery Guest";
+		return "Resource Optimism";
 	}
 
 	/**
@@ -226,7 +226,7 @@ public class ResourceOptimism extends AbstractSmell {
     }
 
 	public void insertTestSmell (Range range, MethodDeclaration testMethod) {
-		cadaTestSmell = new TestSmellDescription("Ignored Test", 
+		cadaTestSmell = new TestSmellDescription(getSmellName(), 
 				 "....", 
 				 getFilePath(), 
 				 getClassName(),

@@ -142,7 +142,7 @@ public class ExceptionCatchingThrowing extends AbstractSmell {
 //		}
 	}
 	public void insertTestSmell (Range range, TestMethod testMethod) {
-		cadaTestSmell = new TestSmellDescription("Conditional Test Logic", 
+		cadaTestSmell = new TestSmellDescription(getSmellName(), 
 												 "Assertion Explanation", 
 				 								 getFilePath(), 
 				 								 getClassName(),

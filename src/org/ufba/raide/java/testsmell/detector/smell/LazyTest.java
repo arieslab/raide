@@ -351,7 +351,7 @@ public class LazyTest extends AbstractSmell {
        
     }
 	public void insertTestSmell (Range range, TestMethod testMethod, String key, String linhasAgrupadas) {
-		cadaTestSmell = new TestSmellDescription("Ignored Test", 
+		cadaTestSmell = new TestSmellDescription(getSmellName(), 
 												 "....", 
 				 								 getFilePath(), 
 				 								 getClassName(),

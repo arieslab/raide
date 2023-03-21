@@ -189,7 +189,7 @@ public class RedundantAssertion extends AbstractSmell {
         }
 	}
 	public void insertTestSmell (Range range, MethodDeclaration testMethod) {
-		cadaTestSmell = new TestSmellDescription("Ignored Test", 
+		cadaTestSmell = new TestSmellDescription(getSmellName(), 
 				 "....", 
 				 getFilePath(), 
 				 getClassName(),

@@ -67,7 +67,7 @@ public class MysteryGuest extends AbstractSmell {
 	}
 	@Override
 	public String getSmellName() {
-		return "Resource Optimism";
+		return "Mystery Guest";
 	}
 
 	/**
@@ -193,7 +193,7 @@ public class MysteryGuest extends AbstractSmell {
 //		insertTestSmell(n.getRange().get(), this.testMethod);
 
 	public void insertTestSmell (Range range, MethodDeclaration testMethod) {
-		cadaTestSmell = new TestSmellDescription("Ignored Test", 
+		cadaTestSmell = new TestSmellDescription(getSmellName(), 
 				 "....", 
 				 getFilePath(), 
 				 getClassName(),

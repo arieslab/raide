@@ -146,6 +146,7 @@ public class AllTestSmellsView extends ViewPart {
 								RAIDEUtils.linesAsNumbers(smellDetected.getLinePositionEnd()));
 						
 						log += RAIDEUtils.encode(source) + "\n";
+						//log += gitResult + "\n";
 					} catch (GitAPIException e) {
 						e.printStackTrace();
 					}
@@ -239,11 +240,11 @@ public class AllTestSmellsView extends ViewPart {
 	private List<TestSmellDescription> detectTestSmellByType(String testSmellType, List<TestFile> testFiles)
 			throws IOException {
 
-		TestSmellDetector testSmellDetector = TestSmellDetector.createTestSmellDetector(testSmellType);
 		ArrayList<TestSmellDescription> testSmellsDetected = new ArrayList<TestSmellDescription>();
 
 		for (TestFile file : testFiles) {
 			System.out.println("[" + testSmellType + "] Processing: " + file.getTestFilePath());
+			TestSmellDetector testSmellDetector = TestSmellDetector.createTestSmellDetector(testSmellType);
 			testSmellDetector.detectSmells(file, testSmellType);
 			testSmellsDetected.addAll(testSmellDetector.getLista());
 			testSmellDetector.setLista(new ArrayList<>());
