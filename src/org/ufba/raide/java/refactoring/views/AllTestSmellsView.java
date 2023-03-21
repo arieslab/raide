@@ -48,8 +48,16 @@ public class AllTestSmellsView extends ViewPart {
 	private IJavaProject project;
 	private ISelection currentSelection;
 	private String resultsCsvFile;
-
 	private boolean isAnalysisRunning;
+	public String srcProject;
+
+	public String getSrcProject() {
+		return srcProject;
+	}
+
+	public void setSrcProject(String srcProject) {
+		this.srcProject = srcProject;
+	}
 
 	public static String getMessageDialogTitle() {
 		return MESSAGE_DIALOG_TITLE;
@@ -117,8 +125,9 @@ public class AllTestSmellsView extends ViewPart {
 			String csvHeader = "Test Smell;Test Method;File Path;Begin;End;Commit Begin;Commit End\n";
 			fos.write(csvHeader.getBytes());
 
-			GitHelper gitHelper = new GitHelper("C:\\Users\\raila\\Documents\\Workspace\\maven-dependency-plugin".replace("\\", "/"));
-
+//			GitHelper gitHelper = new GitHelper("C:\\Users\\raila\\Documents\\Workspace\\maven-dependency-plugin".replace("\\", "/"));
+			GitHelper gitHelper = new GitHelper(getSrcProject());
+			
 			for (String testSmellType : testSmellsTypes) {
 				List<TestSmellDescription> testSmells = detectTestSmellByType(testSmellType, projectTestFiles);
 				for (TestSmellDescription smellDetected : testSmells) {
@@ -144,6 +153,7 @@ public class AllTestSmellsView extends ViewPart {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	
 	}
 
 	/**
@@ -170,6 +180,7 @@ public class AllTestSmellsView extends ViewPart {
 
 				if (valido) {
 					project = javaProject;
+					setSrcProject(diretorioPacote.replace("/src/test/java", ""));
 				}
 
 				return valido;
