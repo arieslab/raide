@@ -241,6 +241,7 @@ public class AllTestSmellsView extends ViewPart {
 			System.out.println("[" + testSmellType + "] Processing: " + file.getTestFilePath());
 			testSmellDetector.detectSmells(file, testSmellType);
 			testSmellsDetected.addAll(testSmellDetector.getLista());
+			testSmellDetector.setLista(new ArrayList<>());
 		}
 		return testSmellsDetected;
 	}
@@ -304,7 +305,7 @@ public class AllTestSmellsView extends ViewPart {
 		private String getCommitFromLines(String[] lines) {
 			String commitHashes = "";
 			for (int i = 0; i < lines.length; i++) {
-				RevCommit commit = blameResult.getSourceCommit(Integer.valueOf(lines[i]) - 1);
+				RevCommit commit = blameResult.getSourceCommit(Integer.valueOf(lines[i].trim()) - 1);
 				String hash = commit.getName();
 				if (!commitHashes.isEmpty()) {
 					commitHashes += "," + hash;
