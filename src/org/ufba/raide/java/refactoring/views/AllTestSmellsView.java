@@ -122,7 +122,7 @@ public class AllTestSmellsView extends ViewPart {
 			List<TestFile> projectTestFiles = getProjectTestFiles();
 			File results = new File(resultsCsvFile);
 			FileOutputStream fos = new FileOutputStream(results);
-			String csvHeader = "Test Smell;Test Method;File Path;Begin;End;Commit Begin;Commit End\n";
+			String csvHeader = "Test Smell;Test Method;File Path;Begin;End;Commit Begin;Commit End;Source\n";
 			fos.write(csvHeader.getBytes());
 
 //			GitHelper gitHelper = new GitHelper("C:\\Users\\raila\\Documents\\Workspace\\maven-dependency-plugin".replace("\\", "/"));
@@ -139,8 +139,13 @@ public class AllTestSmellsView extends ViewPart {
 
 						String gitResult = gitHelper.getCommitHashes(smellDetected.getFilePath(),
 								smellDetected.getLinePositionBegin(), smellDetected.getLinePositionEnd());
-
-						log += gitResult + "\n";
+						log += gitResult + ";";
+						
+						String source = RAIDEUtils.copyMethodContent(smellDetected.getFilePath(), 
+								RAIDEUtils.linesAsNumbers(smellDetected.getLinePositionBegin()), 
+								RAIDEUtils.linesAsNumbers(smellDetected.getLinePositionEnd()));
+						
+						log += RAIDEUtils.encode(source) + "\n";
 					} catch (GitAPIException e) {
 						e.printStackTrace();
 					}
