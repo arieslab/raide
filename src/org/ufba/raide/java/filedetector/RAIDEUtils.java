@@ -100,7 +100,12 @@ public final class RAIDEUtils {
 	
 	public static String extractOnlySourceDir(String projectPath, String testFilePath) {
 		String projectDir = projectPath.substring(projectPath.lastIndexOf("/")).replace("/", "").replace("\\","");
-		String filePath = testFilePath.split(projectDir)[1].substring(1);
+		//String filePath = testFilePath.split(projectDir)[1].substring(1);
+		//return filePath;
+		String testFile = testFilePath.replace("\\", "/");
+		
+		String filePath = testFile.substring(testFile.indexOf(projectDir));
+		filePath = filePath.substring(filePath.indexOf("src"));
 		return filePath;
 	}
 	

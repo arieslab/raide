@@ -124,7 +124,7 @@ public class AllTestSmellsView extends ViewPart {
 			List<TestFile> projectTestFiles = getProjectTestFiles();
 			File results = new File(resultsCsvFile);
 			FileOutputStream fos = new FileOutputStream(results);
-			String csvHeader = "Test Smell;Test Method;File Path;Begin;End;Commit Begin;Commit End;Source\n";
+			String csvHeader = "Test Smell;File Path;Test Method;Begin;End;Commit Begin;Commit End;Source\n";
 			fos.write(csvHeader.getBytes());
 
 //			GitHelper gitHelper = new GitHelper("C:\\Users\\raila\\Documents\\Workspace\\maven-dependency-plugin".replace("\\", "/"));
