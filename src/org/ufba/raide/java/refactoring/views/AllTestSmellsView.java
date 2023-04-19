@@ -7,6 +7,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -33,6 +34,7 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
+import org.ufba.raide.java.filedetector.JGitBlame;
 import org.ufba.raide.java.filedetector.RAIDEUtils;
 import org.ufba.raide.java.filedetector.TestFileDetectorMain;
 import org.ufba.raide.java.filedetector.TrataStringCaminhoTeste;
@@ -147,7 +149,7 @@ public class AllTestSmellsView extends ViewPart {
 						
 						log += RAIDEUtils.encode(source) + "\n";
 						//log += gitResult + "\n";
-					} catch (GitAPIException e) {
+					} catch (Exception e) {
 						e.printStackTrace();
 					}
 					fos.write(log.getBytes());
@@ -275,23 +277,21 @@ public class AllTestSmellsView extends ViewPart {
 
 	class GitHelper {
 
-		private Git git;
 		private BlameResult blameResult;
 		private String projectPath;
 
 		public GitHelper(String projectPath) throws IOException {
 			this.projectPath = projectPath;
-			this.git = Git.open(new File(projectPath));
 		}
-
-		public String getCommitHashes(String testFilePath, String beginLine, String endLine) throws GitAPIException {
+		
+		public String getCommitHashes(String testFilePath, String beginLine, String endLine) throws Exception {
 			String projectDir = projectPath.substring(projectPath.lastIndexOf("/"));
-			String filePath = testFilePath.replace("\\", "/").split(projectDir)[1].substring(1);
-
+			String testFile = testFilePath.replace("\\", "/");
+			
+			String filePath = testFile.substring(testFile.indexOf(projectDir));
+			filePath = filePath.substring(filePath.indexOf("src"));
+				
 			System.out.println("RUNNING GIT FOR " + filePath);
-
-			BlameCommand blameCommand = new BlameCommand(git.getRepository()).setFilePath(filePath);
-			this.blameResult = blameCommand.call();
 
 			String[] beginLines = { beginLine };
 			String[] endLines = { endLine };
@@ -303,16 +303,26 @@ public class AllTestSmellsView extends ViewPart {
 			if (endLine.contains(",")) {
 				endLines = endLine.trim().split(",");
 			}
-
-			String result = getCommitFromLines(beginLines) + ";" + getCommitFromLines(endLines);
+			
+			String beginCommit, endCommit, result;
+			
+			beginCommit = getHashByLines(projectPath, filePath, beginLines);
+			
+			if (Arrays.equals(beginLines, endLines)) {
+				endCommit = beginCommit;
+			} else {
+				endCommit =  getHashByLines(projectPath, filePath, endLines);
+			}
+			
+			result = beginCommit + ";" + endCommit;
 			return result;
 		}
-
-		private String getCommitFromLines(String[] lines) {
+		
+		private String getHashByLines(String projectDir, String filePath, String[] lines) throws Exception {
 			String commitHashes = "";
 			for (int i = 0; i < lines.length; i++) {
-				RevCommit commit = blameResult.getSourceCommit(Integer.valueOf(lines[i].trim()) - 1);
-				String hash = commit.getName();
+				int lineNumber = Integer.valueOf(lines[i].trim()); 
+				String hash = JGitBlame.getCommit(projectDir, filePath, lineNumber - 1);
 				if (!commitHashes.isEmpty()) {
 					commitHashes += "," + hash;
 				} else {
@@ -321,6 +331,5 @@ public class AllTestSmellsView extends ViewPart {
 			}
 			return commitHashes;
 		}
-
 	}
 }
