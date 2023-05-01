@@ -140,7 +140,7 @@ public class UnknownTest extends AbstractSmell {
                 // if there are duplicate messages, then the smell exists
                 if (!hasAssert && !hasExceptionAnnotation) {
                     instanceUnkNown.add(new MethodUsage(n.getNameAsString(), "",n.getRange().get().begin.line + "-" + n.getRange().get().end.line));
-                    insertTestSmell(n.getRange().get(), this.currentMethod);
+                    insertTestSmell(n.getRange().get(), n);
                 }
                 //reset values for next method
                 currentMethod = null;
