@@ -12,7 +12,7 @@ public class Util {
             //only analyze methods that either have a @test annotation (Junit 4) or the method name starts with 'test'
             if (n.getAnnotationByName("Test").isPresent() || n.getNameAsString().toLowerCase().startsWith("test")) {
                 //must be a public method
-                if (n.getModifiers().contains(Modifier.PUBLIC)) {
+                if (n.getModifiers().contains(Modifier.PUBLIC) && !n.getModifiers().contains(Modifier.ABSTRACT)) {
                     valid = true;
                 }
             }
